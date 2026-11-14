@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>shipping-policy — Shipping information (/{countryCode}/shipping)</title>
+  <link rel="stylesheet" href="assets/store.css">
+</head>
+<body data-shell="main" data-cart-count="0">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/shipping/page.tsx, modules/policies/templates(PolicyPage, ShippingSummary, PoliciesUnavailable), lib/util/store-policies.ts(formatDayRange), apps/backend/src/lib/region-store-policies.ts(DEFAULT_REGION_STORE_POLICIES) -->
+  <!-- 값: shipping_rate 10(EUR, convertToLocale en-US → €10.00, 0이면 'Free'), handling 0–1일, transit 2–3일. 국가코드는 countryCode.toUpperCase() -->
+  <main id="page">
+    <section data-scene="default" data-scene-name="배송 정책">
+      <div class="content-container py-12" style="max-width:768px;margin:0 auto"><h1 style="font-size:24px;font-weight:600;line-height:36px;margin-bottom:32px">Shipping information</h1><div class="stack gap-6" style="font-size:14px"><p>Orders to DK ship with the following rates and delivery times.</p><dl style="display:grid;grid-template-columns:auto 1fr;column-gap:24px;row-gap:8px;margin:0"><dt class="subtle">Shipping rate</dt><dd style="margin:0">€10.00</dd><dt class="subtle">Processing time</dt><dd style="margin:0">0-1 business days</dd><dt class="subtle">Delivery time</dt><dd style="margin:0">2-3 business days after dispatch</dd></dl><p class="subtle">Available shipping methods and final costs are shown at checkout.</p></div></div>
+    </section>
+    <section data-scene="unavailable" data-scene-name="정책 없음">
+      <div class="content-container py-12" style="max-width:768px;margin:0 auto"><h1 style="font-size:24px;font-weight:600;line-height:36px;margin-bottom:32px">Shipping information</h1><div class="stack gap-6" style="font-size:14px"><p class="subtle">Policy details for this region haven&#39;t been published yet.</p></div></div>
+      <!-- getStorePolicies(countryCode).current가 없을 때 -->
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

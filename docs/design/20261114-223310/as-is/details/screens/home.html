@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>home — Home (/{countryCode})</title>
+  <link rel="stylesheet" href="assets/store.css">
+</head>
+<body data-shell="main" data-cart-count="0">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/page.tsx, modules/home/components/hero, featured-products/product-rail, layout/components/cart-mismatch-banner -->
+  <main id="page">
+    <section data-scene="default" data-scene-name="기본">
+      <div style="height:75vh;border-bottom:1px solid var(--border);background:var(--bg-subtle);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center">
+        <span>
+          <h1 style="font-size:30px;line-height:40px;font-weight:400">Ecommerce Starter Template</h1>
+          <h2 style="font-size:30px;line-height:40px;font-weight:400;color:var(--fg-subtle)">Powered by Medusa and Next.js</h2>
+        </span>
+        <a class="btn btn-secondary" href="https://github.com/medusajs/dtc-starter">View on GitHub ↗</a>
+      </div>
+      <div class="content-container py-12">
+        <div class="row between mb-8"><span class="xl">Summer Essentials</span><a class="link small" href="collection.html">View all ↗</a></div>
+        <ul class="product-grid">
+          <li class="product-card"><a href="product-detail.html"><div class="thumb">thumbnail</div><div class="meta"><span>Medusa T-Shirt</span><span>€10.00</span></div></a></li>
+          <li class="product-card"><a href="product-detail.html"><div class="thumb">thumbnail</div><div class="meta"><span>Medusa Sweatshirt</span><span>€10.00</span></div></a></li>
+          <li class="product-card"><a href="product-detail.html"><div class="thumb">thumbnail</div><div class="meta"><span>Medusa Sweatpants</span><span>€10.00</span></div></a></li>
+        </ul>
+      </div>
+      <div class="content-container py-12">
+        <div class="row between mb-8"><span class="xl">Winter Layers</span><a class="link small" href="collection.html">View all ↗</a></div>
+        <ul class="product-grid">
+          <li class="product-card"><a href="product-detail.html"><div class="thumb">thumbnail</div><div class="meta"><span>Demo Product 12</span><span>€10.00</span></div></a></li>
+          <li class="product-card"><a href="product-detail.html"><div class="thumb">thumbnail</div><div class="meta"><span>Demo Product 18</span><span>€10.00</span></div></a></li>
+          <li class="product-card"><a href="product-detail.html"><div class="thumb">thumbnail</div><div class="meta"><span>Medusa Shorts</span><span>€10.00</span></div></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section data-scene="side-menu" data-scene-name="사이드 메뉴" data-base="default" data-overlay="side-menu"></section>
+    <section data-scene="search-drawer" data-scene-name="검색 드로어 결과" data-base="default" data-overlay="search"></section>
+    <section data-scene="search-no-results" data-scene-name="검색 드로어 결과 없음" data-base="default" data-overlay="search-empty"></section>
+
+    <section data-scene="cart-mismatch" data-scene-name="장바구니 이전 실패 배너">
+      <div style="display:flex;justify-content:center;gap:8px;padding:16px;margin-top:8px;background:#fdba74;color:#9a3412;font-size:14px">
+        <span>⚠ Something went wrong when we tried to transfer your cart</span><span>·</span>
+        <button class="plain" type="button" style="background:none;border:0;color:#431407">Run transfer again</button>
+      </div>
+      <div style="height:40vh;background:var(--bg-subtle);display:flex;align-items:center;justify-content:center" class="subtle">
+        (로그인 고객과 장바구니 고객이 다를 때 모든 (main) 페이지 상단에 표시. 아래 본문은 각 페이지 본문)
+      </div>
+    </section>
+
+    <section data-scene="empty" data-scene-name="지역·컬렉션 없음">
+      <div class="content-container py-12 subtle" style="min-height:30vh">
+        (Home 컴포넌트가 null을 반환해 헤더와 푸터 사이 본문이 비어 있다)
+      </div>
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>
