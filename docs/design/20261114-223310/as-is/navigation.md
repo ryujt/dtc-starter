@@ -97,21 +97,92 @@ Search(ProductResults) --> (/store/product_by_handle) : 결과 목록에서 상�
 <a id="n04"></a>
 ## N04. 상품 상세와 장바구니 담기
 
+### 상품 상세 열기와 옵션 선택
+
 ```navigation
-ProductDetail --> (select_variant) : 옵션 선택
-(select_variant) --> ProductDetail(VariantSelected) : 재고 있는 변형
-(select_variant) --> ProductDetail(OutOfStock) : 품절 변형
-ProductDetail(VariantSelected) --> (/store/line_items) : Add to cart(JS)
-(/store/line_items) --> ProductDetail(CartDropdown) : 추가됨
-ProductDetail(CartDropdown) --> Cart : Go to cart
-ProductDetail(VariantSelected) --> (add_form_handler) : Add to cart(JS 없음)
-(add_form_handler) --> Cart : 추가됨(303)
-ProductDetail --> Collection : 컬렉션명
+(check_product_region) --> (/store/product_by_handle) : 메모리에서 판매 지역 확인
+(check_product_region) --> (/store/regions) : 국가별 매핑 없음
+(/store/regions) --> (/store/product_by_handle) : 목록에서 판매 지역 확인
+(/store/regions) --> NotFound : 해당 국가의 판매 지역 없음
+(/store/product_by_handle) --> ProductDetail : 상품 조회 성공
+(/store/product_by_handle) --> NotFound : 일치하는 상품 없음
+ProductDetail --> (select_variant) : 옵션 선택 또는 변경
+(select_variant) --> ProductDetail(VariantSelected) : 재고 있는 상품 변형, 담기 가능
+(select_variant) --> ProductDetail(OutOfStock) : 품절, 담기 비활성
+(select_variant) --> ProductDetail : 일치하는 상품 변형 없음, 담기 비활성
+ProductDetail --> Collection : 컬렉션명 선택
 ```
 
-- 상품 페이지는 재고 있는 첫 변형을 미리 고른 채 열린다. 옵션 조합에 맞는 변형이 없으면 버튼이 "Select variant"로 비활성이고, 품절이면 "Out of stock"으로 비활성이다. 옵션 선택은 `v_id` 쿼리만 바꾼다.
-- JavaScript로 담으면 같은 페이지에서 헤더 장바구니 드롭다운이 열린다. 실패하면 안내 없이 로딩이 멈춘다(분석서 I04).
-- JavaScript 없이 담으면 `POST /{cc}/cart/add`가 `Cart`로 303 이동시킨다. 실패는 평문 응답이다(분석서 I06).
+- 상품 카드를 누르거나 `/{cc}/products/{handle}`을 직접 열면, 상세를 생성하는 Next.js 서버 코드가 판매 지역과 상품을 조회한다. 정적 렌더링과 캐시가 적용된다. 관련 상품은 별도의 상품 목록 조회로 표시한다.
+- 초기 선택은 재고 있는 첫 상품 변형이며, 전부 품절이면 첫 변형을 사용한다. JavaScript가 실행되면 이미 로드한 상품 변형에서 옵션 조합을 찾고 URL의 `v_id`를 갱신한다. 옵션에 맞는 변형이 없으면 `Select variant`, 품절이면 `Out of stock`이 표시된다.
+
+### JavaScript 사용 시 담기
+
+```navigation
+ProductDetail(VariantSelected) --> (add_to_cart) : Add to cart, Next.js Server Action 실행
+(add_to_cart) --> (/store/regions) : 국가별 매핑 없음
+(add_to_cart) --> (check_cart_cookie) : 메모리에서 판매 지역 확인
+(/store/regions) --> (check_cart_cookie) : 목록에서 판매 지역 확인
+(/store/regions) --> ProductDetail(VariantSelected) : 판매 지역 없음, 요청 실패
+(check_cart_cookie) --> (/store/cart_retrieve) : 장바구니 ID 쿠키 있음
+(check_cart_cookie) --> (/store/carts) : 장바구니 ID 쿠키 없음
+(/store/cart_retrieve) --> (/store/carts) : 장바구니를 가져오지 못함
+(/store/cart_retrieve) --> (/store/cart_update) : 장바구니와 현재 페이지의 판매 지역이 다름
+(/store/cart_retrieve) --> (/store/line_items) : 장바구니와 현재 페이지의 판매 지역이 같음
+(/store/carts) --> (/store/line_items) : 생성 성공, 장바구니 ID를 쿠키에 저장
+(/store/cart_update) --> (/store/line_items) : 지역 갱신 성공
+(/store/carts) --> ProductDetail(VariantSelected) : 생성 실패, 상세에 머무름
+(/store/cart_update) --> ProductDetail(VariantSelected) : 지역 갱신 실패, 상세에 머무름
+(/store/line_items) --> ProductDetail(VariantSelected) : 담기 실패, 상세에 머무름
+(/store/line_items) --> (/store/cart_after_add) : 담기 성공, 헤더가 서버에서 장바구니를 받지 못한 경우 재조회
+(/store/line_items) --> ProductDetail(CartDropdown) : 담기 성공, 헤더가 받은 장바구니의 수량 변화 확인
+(/store/cart_after_add) --> ProductDetail(CartDropdown) : 장바구니 수량 변화 확인
+(/store/cart_after_add) --> ProductDetail(VariantSelected) : 수량 변화 확인 안 됨, 상세에 머무름
+ProductDetail(CartDropdown) --> Cart : Go to cart
+```
+
+- `addToCart`가 선택한 상품 변형 ID와 수량 1을 보낸다. 장바구니 생성·지역 갱신·품목 추가 요청이 실패하면 상세에 머무른다. 현재 구현은 오류 문구를 표시하지 않으며, 예외가 발생하면 담기 버튼의 로딩 상태를 해제하는 코드에 도달하지 않는다.
+
+### JavaScript 없이 담기
+
+```navigation
+ProductDetail(VariantSelected) --> (/cart/add) : Add to cart, Next.js 폼 제출
+(/cart/add) --> (/store/regions) : 국가별 매핑 없음
+(/cart/add) --> (resolve_form_variant) : 메모리에서 판매 지역 확인
+(/store/regions) --> (resolve_form_variant) : 목록에서 판매 지역 확인
+(/store/regions) --> (form_error) : 판매 지역 없음, 평문 404
+(resolve_form_variant) --> (/store/product_retrieve) : 상품 ID와 선택 옵션으로 상품 변형 확인
+(resolve_form_variant) --> (check_form_cart) : 폼의 변형 ID 사용
+(resolve_form_variant) --> (form_error) : 변형 ID 없음, 평문 400
+(/store/product_retrieve) --> (check_form_cart) : 일치하는 상품 변형 찾음
+(/store/product_retrieve) --> (form_error) : 조회 실패는 평문 404, 일치하는 변형 없음은 평문 400
+(check_form_cart) --> (/store/form_line_items) : 기존 장바구니 ID 쿠키 있음, 해당 장바구니에 담기
+(check_form_cart) --> (/store/carts) : 장바구니 ID 쿠키 없음, 새 장바구니 생성
+(/store/carts) --> (/store/form_line_items) : 새 장바구니에 담기
+(/store/form_line_items) --> (/store/carts) : 기존 장바구니에 담기 실패, 새 장바구니를 만들어 한 번 재시도
+(/store/carts) --> (form_error) : 장바구니 생성 실패, 평문 400
+(/store/form_line_items) --> (form_error) : 새 장바구니에 담기 실패, 평문 400
+(/store/form_line_items) --> Cart : 성공, 장바구니 ID 쿠키 저장 후 303 이동
+```
+
+- JavaScript 없는 폼은 기존 장바구니를 조회하거나 지역을 갱신하는 별도 요청 없이 쿠키의 ID로 담기를 시도한다. 평문 오류 응답은 `form_error`에 표시했다.
+
+### API 노드 대응
+
+| 다이어그램 노드 | 실제 HTTP 요청 |
+| --- | --- |
+| `(/store/regions)` | Medusa `GET /store/regions` |
+| `(/store/product_by_handle)` | Medusa `GET /store/products?handle={handle}&region_id={regionId}` |
+| `(/cart/add)` | Next.js `POST /{cc}/cart/add` |
+| `(/store/product_retrieve)` | Medusa `GET /store/products/{productId}` (`region_id`와 변형·옵션 필드 포함) |
+| `(/store/cart_retrieve)` / `(/store/cart_after_add)` | Medusa `GET /store/carts/{cartId}` (기존 장바구니 확인 / 담은 후 헤더 갱신) |
+| `(/store/carts)` | Medusa `POST /store/carts` (`region_id` 포함) |
+| `(/store/cart_update)` | Medusa `POST /store/carts/{cartId}` (`region_id` 갱신) |
+| `(/store/line_items)` / `(/store/form_line_items)` | Medusa `POST /store/carts/{cartId}/line-items` (`variant_id`, `quantity` 포함) |
+
+- 상세의 메타데이터 생성과 공통 헤더의 국가 선택에도 `GET /store/regions`가 쓰인다. 관련 상품은 `GET /store/products`를 사용하며, 현재 상품의 컬렉션·태그가 있으면 필터에 포함한다.
+- 공통 헤더·푸터는 `GET /store/locales`, `GET /store/collections`, `GET /store/product-categories`도 사용한다. 공통 레이아웃은 인증 토큰이 있으면 `GET /store/customers/me`, 장바구니 ID가 있으면 `GET /store/carts/{cartId}`, 장바구니 조회에 성공하면 `GET /store/shipping-options?cart_id={cartId}`를 사용한다. 헤더도 장바구니를 조회하며, 서버에서 장바구니를 받지 못한 경우 브라우저에서 Server Action을 실행해 장바구니를 가져온다.
+- SDK가 감싸는 HTTP 요청은 [Medusa JS SDK 2.22.7 소스](https://github.com/medusajs/medusa/blob/v2.22.7/packages/core/js-sdk/src/store/index.ts)에서 확인했다.
 
 ### 화면 확인 링크
 
@@ -120,6 +191,8 @@ ProductDetail --> Collection : 컬렉션명
 | ProductDetail · 옵션 선택·품절·장바구니 드롭다운 | [기본](details/screens/product-detail.html#default) · [옵션 선택](details/screens/product-detail.html#variant-selected) · [품절](details/screens/product-detail.html#out-of-stock) · [장바구니 드롭다운](details/screens/product-detail.html#cart-dropdown) | [배치·장면](screen-layout.md#product-detail) |
 | Cart · 기본 | [기본](details/screens/cart.html#default) | [배치·장면](screen-layout.md#cart) |
 | Collection · 기본 | [기본](details/screens/collection.html#default) | [배치·장면](screen-layout.md#collection) |
+| NotFound · 기본 | [기본](details/screens/not-found.html#default) | [배치·장면](screen-layout.md#not-found) |
+| 담기 폼 오류 | Next.js 평문 HTTP 응답 | 해당 없음 |
 
 <a id="n05"></a>
 ## N05. 장바구니 관리와 체크아웃 시작
