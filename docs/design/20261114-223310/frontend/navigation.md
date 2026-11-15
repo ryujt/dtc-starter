@@ -17,7 +17,7 @@
 | Store | `/{cc}/store` | 지역 없으면 NotFound | `(main)/store/page.tsx` |
 | Category | `/{cc}/categories/[...category]` | 카테고리 없으면 NotFound | `(main)/categories/[...category]/page.tsx` |
 | Collection | `/{cc}/collections/[handle]` | 컬렉션 없으면 NotFound | `(main)/collections/[handle]/page.tsx` |
-| Search | `/{cc}/search?q=` | 지역 없으면 NotFound. 검색어 없으면 빈 결과 | `(main)/search/page.tsx` |
+| Search | `/{cc}/search` (`q` 선택) | 국가 코드에 해당하는 판매 지역이 필요. 검색어가 없으면 검색창만, 있으면 결과 목록 또는 결과 없음 안내 표시 | `(main)/search/page.tsx` |
 | ProductDetail | `/{cc}/products/[handle]` | 지역·상품 없으면 NotFound | `(main)/products/[handle]/page.tsx` |
 | Cart | `/{cc}/cart` | 장바구니가 없거나 조회에 실패하면 빈 장바구니 장면(`retrieveCart`가 오류를 `null`로 바꾸므로 page의 `notFound()` 분기는 실행되지 않음) | `(main)/cart/page.tsx`, `lib/data/cart.ts` `retrieveCart` |
 | Checkout | `/{cc}/checkout?step=address\|delivery\|payment\|review` | 장바구니 없으면 NotFound. 배송·결제 수단 조회 실패 시 입력 폼 영역 없음. 단계는 쿼리로 같은 페이지 안에서 전환 | `(checkout)/checkout/page.tsx`, `modules/checkout/templates/checkout-form` |
@@ -49,8 +49,8 @@ DSL 이름이 달라도 같은 HTTP 계약을 쓰는 노드가 있다. 한 그�
 | `(/store/collection_by_handle)` | `getCollectionByHandle` | `GET /store/collections?handle=` | 확인 |
 | `(/store/category_by_handle)` | `getCategoryByHandle` | `GET /store/product-categories?handle=` | 확인 |
 | `(/store/product_by_handle)` | `getRegion` → `listProducts({ handle })` | `GET /store/regions` → `GET /store/products?handle=&region_id=` | 확인 |
-| `(/store/product_search)` | `getRegion` → 검색어가 있을 때 `listProducts({ q, limit: 24 })` | `GET /store/regions` → `GET /store/products?q=` | 확인 |
-| `(/store/search)` | `SearchDrawer`의 InstantSearch `searchClient`(`@medusajs/instantsearch-adapter`) | 경로 `/store/search`, method 미확인 | 경로 확인 |
+| `(/store/products)` | Search 페이지가 검색어의 앞뒤 공백을 제거한 뒤 검색어가 남으면 `listProducts({ q, limit: 24 })` 호출 | `GET /store/products?q=…&region_id=…&limit=24` | 확인 |
+| `(/store/search)` | 검색 패널과 Store 목록의 InstantSearch `searchClient`(`@medusajs/instantsearch-adapter`) | 경로 `/store/search`, method 미확인 | 경로 확인 |
 | `(/store/cart_add_item)` | Server Action `addToCart` → `getOrSetCart`(`getRegion`, `retrieveCart`, 없으면 `sdk.store.cart.create`, 지역이 다르면 `sdk.store.cart.update`) → `sdk.store.cart.createLineItem` | `GET /store/carts/{id}` → `POST /store/carts` 또는 `POST /store/carts/{id}` → `POST /store/carts/{id}/line-items` | GET 확인, 나머지 추정 |
 | `(/store/cart_retrieve)` | `retrieveCart`(헤더 `CartButton`·`CartDropdown`·Cart 페이지), `payment-return`의 `sdk.client.fetch`, `cart/resume`의 `sdk.store.cart.retrieve` | `GET /store/carts/{id}` | 확인(`cart.retrieve`만 추정) |
 | `(/store/product_retrieve)` | `cart/add` `resolveVariantId` → `sdk.store.product.retrieve` | `GET /store/products/{id}` | 추정 |
@@ -90,11 +90,11 @@ Navigation 단독 작업이라 화면 HTML·Layout을 만들지 않았고 기존
 ```navigation
 Home --> Store : 상단·사이드 메뉴 Store
 Home --> Collection : 컬렉션 레일 선택
-Home --> Search : 검색 아이콘(JS 없음)·푸터 Search
+Home --> Search : 푸터 Search·검색 아이콘(JS 미사용)
 Store --> ProductDetail : 상품 선택
 Category --> ProductDetail : 상품 선택
 Collection --> ProductDetail : 상품 선택
-Search --> ProductDetail : 상품 선택
+Search --> ProductDetail : 검색 결과 목록에서 상품 선택
 ProductDetail --> Cart : 장바구니 담기(JS 없음)·Cart 링크
 Cart --> Checkout : Go to checkout
 Cart --> AccountLogin : Sign in
@@ -118,6 +118,43 @@ TransferRequest --> TransferRequest : 수락·거절(같은 페이지)
 <a id="n01"></a>
 ## N01. 상품 찾기
 
+### 검색 페이지에서 상품 찾기
+
+```navigation
+Home --> (check_search_region) : 푸터 Search 또는 JavaScript 없이 헤더 검색 아이콘 선택
+Search --> (check_search_region) : 검색어 입력 후 제출
+Search(ProductResults) --> (check_search_region) : 검색어를 바꿔 다시 제출
+Search(NoResults) --> (check_search_region) : 검색어를 바꿔 다시 제출
+(check_search_region) --> NotFound : URL의 국가 코드에 해당하는 판매 지역 없음
+(check_search_region) --> Search : 판매 지역 있음·검색어 없음, 검색창 표시
+(check_search_region) --> (/store/products) : 판매 지역 있음·검색어 있음, 키워드와 지역 ID 전달
+(/store/products) --> Search(ProductResults) : 일치 상품 있음, 결과 목록 표시
+(/store/products) --> Search(NoResults) : 일치 상품 없음, 안내와 검색창 표시
+Search(ProductResults) --> (/store/product_by_handle) : 결과 목록에서 상품 카드 선택
+(/store/product_by_handle) --> ProductDetail : 상품 있음
+(/store/product_by_handle) --> NotFound : 판매 지역 또는 상품 없음
+```
+
+- 검색 페이지는 URL의 국가 코드에 연결된 Medusa 판매 지역을 확인한다. `getRegion`은 저장된 국가별 매핑을 먼저 확인하고, 필요하면 `GET /store/regions`로 조회한다. 초기 설정의 `dk`는 유로를 사용하는 `Europe` 판매 지역에 속한다. 매핑을 찾지 못하면 검색 전에 404 화면을 표시한다.
+- 처음 `/{cc}/search`에 들어가거나 공백만 제출하면 검색창을 표시한다. `GET /{cc}/search?q=shirt`로 폼을 제출하거나 주소를 직접 열면 키워드와 지역 ID를 상품 API에 전달한다. 목록에는 한 건만 일치해도 상품 카드가 표시되며, 최대 24개를 보여준다. 일치 상품이 없으면 같은 페이지에 안내를 표시한다. 사용자는 어느 경우든 검색창에서 검색어를 다시 제출할 수 있다.
+- `Search(ProductResults)`와 `Search(NoResults)`는 같은 검색 페이지에서 사용자가 보는 두 장면이다. 결과 카드의 링크를 선택하면 상품 상세로 이동하고, 상세에서 지역과 handle로 선택한 상품을 조회한다.
+
+### 헤더 검색 패널에서 상품 찾기
+
+```navigation
+Home --> Home(SearchDrawer) : 헤더 검색 아이콘 선택, JavaScript 사용
+Home(SearchDrawer) --> (/store/search) : 검색어 입력
+(/store/search) --> Home(SearchDrawerResults) : 결과 목록 표시
+(/store/search) --> Home(SearchDrawer) : 결과 없음 또는 검색 오류 안내
+Home(SearchDrawerResults) --> (/store/product_by_handle) : 결과 목록에서 상품 선택
+(/store/product_by_handle) --> ProductDetail : 상품 있음
+(/store/product_by_handle) --> NotFound : 판매 지역 또는 상품 없음
+```
+
+- 헤더 검색 패널은 현재 페이지 위에서 열린다. `Home`은 이 공통 헤더가 있는 `(main)` 페이지를 대표한다. 입력을 바꾸면 검색 결과가 패널 안에서 갱신되고, 결과 상품을 선택하면 패널이 닫히면서 상세로 이동한다.
+
+### 스토어·컬렉션·카테고리 목록에서 상품 찾기
+
 ```navigation
 Home --> (/store/regions) : 메뉴 Store
 (/store/regions) --> Store : 지역 있음
@@ -130,23 +167,13 @@ Home --> (/store/category_by_handle) : 푸터 카테고리 선택
 Category --> (/store/category_by_handle) : 하위·상위 카테고리 선택
 (/store/category_by_handle) --> Category : 카테고리 있음
 (/store/category_by_handle) --> NotFound : 카테고리 없음
-Home(SearchDrawer) --> (/store/search) : 검색어 입력
-(/store/search) --> Home(SearchDrawer) : 결과·결과 없음·검색 오류
-Home --> (/store/product_search) : 푸터 Search·검색 아이콘 JS 없음
-Search --> (/store/product_search) : 검색어 제출 GET
-(/store/product_search) --> Search : 결과·결과 없음·검색어 없음
-(/store/product_search) --> NotFound : 지역 없음
 Store --> (/store/product_by_handle) : 상품 카드 선택
 Category --> (/store/product_by_handle) : 상품 카드 선택
 Collection --> (/store/product_by_handle) : 상품 카드 선택
-Search --> (/store/product_by_handle) : 결과 상품 선택
-Home(SearchDrawer) --> (/store/product_by_handle) : 검색 결과 선택
 (/store/product_by_handle) --> ProductDetail : 상품 있음
 (/store/product_by_handle) --> NotFound : 지역·상품 없음
 ```
 
-- 헤더 검색 아이콘은 JavaScript가 있으면 같은 페이지 위에 `SearchDrawer`를 열고, 없으면 `/{cc}/search`로 이동한다. 그림의 `Home(SearchDrawer)`는 어느 `(main)` 페이지에서나 열리는 같은 오버레이를 대표한다. 드로어는 입력할 때마다 InstantSearch 어댑터로 `/store/search`를 호출해 결과·결과 없음·오류를 같은 오버레이에 표시한다.
-- `Search`는 진입할 때 지역을 찾고(없으면 `NotFound`), 검색어가 있을 때만 `GET /store/products?q=`로 최대 24개를 가져온다. 폼은 `GET /{cc}/search?q=`로 다시 제출되어 같은 페이지에 결과 또는 "No products match" 문구를 표시한다.
 - `Store`는 진입할 때 지역만 확인한다. 상품 목록·검색·정렬·필터는 페이지 안의 InstantSearch(`/store/search`)가 URL 쿼리와 함께 갱신하며 페이지를 이동하지 않는다.
 - 카테고리는 푸터 목록에서 들어오며 `Category` 안에서 상위·하위 카테고리로 이동한다. 이동할 때마다 handle로 카테고리를 다시 조회한다. 정렬·필터·페이지 이동은 같은 페이지의 쿼리(`sortBy`, `optionValueIds`, `page`)만 바꾸고 `GET /store/products`로 목록을 다시 받는다.
 - 상품 상세는 진입할 때 지역과 handle로 상품을 조회하고, 없으면 `NotFound`를 표시한다. 컬렉션·카테고리도 handle 조회 결과가 없으면 `NotFound`다.
@@ -159,7 +186,9 @@ Home(SearchDrawer) --> (/store/product_by_handle) : 검색 결과 선택
 | Store · 기본 | 확인 불가 — HTML 미작성. 실행 시 `/dk/store` | 없음 — Navigation 단독 작업 |
 | Category · 기본 | 확인 불가 — HTML 미작성. 실행 시 `/dk/categories/{handle}` | 없음 — Navigation 단독 작업 |
 | Collection · 기본 | 확인 불가 — HTML 미작성. 실행 시 `/dk/collections/{handle}` | 없음 — Navigation 단독 작업 |
-| Search · 결과·결과 없음 | 확인 불가 — HTML 미작성. 실행 시 `/dk/search?q=shirt` | 없음 — Navigation 단독 작업 |
+| Search · 검색창 | 확인 불가 — HTML 미작성. 실행 시 `/dk/search` | 없음 — Navigation 단독 작업 |
+| Search · 결과 목록 | 확인 불가 — HTML 미작성. 실행 시 `/dk/search?q=shirt` (일치 상품이 등록된 경우) | 없음 — Navigation 단독 작업 |
+| Search · 결과 없음 | 확인 불가 — HTML 미작성. 실행 시 `/dk/search?q=no-such-product-12345` (일치 상품이 없는 경우) | 없음 — Navigation 단독 작업 |
 | ProductDetail · 기본 | 확인 불가 — HTML 미작성. 실행 시 `/dk/products/{handle}` | 없음 — Navigation 단독 작업 |
 | NotFound · 기본 | 확인 불가 — HTML 미작성. 실행 시 `/dk/products/no-such-handle`, `/dk/categories/no-such-handle` | 없음 — Navigation 단독 작업 |
 
