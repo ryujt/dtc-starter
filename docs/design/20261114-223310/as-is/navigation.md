@@ -68,9 +68,12 @@ Home --> (check_search_region) : 푸터 Search 또는 JavaScript 없이 헤더 �
 Search --> (check_search_region) : 검색어 입력 후 제출
 Search(ProductResults) --> (check_search_region) : 검색어를 바꿔 다시 제출
 Search(NoResults) --> (check_search_region) : 검색어를 바꿔 다시 제출
-(check_search_region) --> NotFound : URL의 국가 코드에 해당하는 판매 지역 없음
-(check_search_region) --> Search : 판매 지역 있음·검색어 없음, 검색창 표시
-(check_search_region) --> (/store/products) : 판매 지역 있음·검색어 있음, 키워드와 지역 ID 전달
+(check_search_region) --> (check_search_query) : 메모리에 국가 코드와 판매 지역의 매핑 있음
+(check_search_region) --> (/store/regions) : 메모리에 해당 국가 코드의 매핑 없음, 지역 목록 조회
+(/store/regions) --> (check_search_query) : 지역 목록에서 국가 코드에 해당하는 판매 지역 찾음
+(/store/regions) --> NotFound : 지역 목록에서 국가 코드에 해당하는 판매 지역을 찾지 못함
+(check_search_query) --> Search : 검색어 없음, 검색창 표시
+(check_search_query) --> (/store/products) : 검색어 있음, 키워드와 지역 ID 전달
 (/store/products) --> Search(ProductResults) : 일치 상품 있음, 결과 목록 표시
 (/store/products) --> Search(NoResults) : 일치 상품 없음, 안내와 검색창 표시
 Search(ProductResults) --> (/store/product_by_handle) : 결과 목록에서 상품 카드 선택
@@ -79,7 +82,8 @@ Search(ProductResults) --> (/store/product_by_handle) : 결과 목록에서 상�
 ```
 
 - 헤더 검색 아이콘은 JavaScript가 있으면 현재 페이지 위에 검색 드로어를 연다. 그림의 `Home(SearchDrawer)`는 모든 `(main)` 페이지에서 열리는 같은 오버레이를 대표한다.
-- JavaScript가 없거나 푸터 Search를 누르면 `/{cc}/search`로 이동한다. 폼은 `GET ?q=`로 같은 페이지에 결과(최대 24개)나 "No products match your search."를 보여 준다. 검색어가 없으면 빈 결과다.
+- 푸터 Search를 누르거나 JavaScript 없이 헤더 검색 아이콘을 선택하면 `/{cc}/search`로 이동한다. Next.js 서버에서 `getRegion(countryCode)`를 실행한다. 국가별 매핑이 메모리에 없으면 `listRegions()`로 Medusa의 `GET /store/regions`를 조회한다. 이 조회에는 Next.js 데이터 캐시가 적용된다.
+- 판매 지역을 찾으면 검색어 유무에 따라 검색창을 표시하거나 상품 목록을 조회한다. 폼은 `GET /{cc}/search?q=…`로 제출되며, 같은 페이지에 결과 목록(최대 24개)이나 "No products match your search." 안내가 표시된다.
 
 ### 화면 확인 링크
 
@@ -88,6 +92,7 @@ Search(ProductResults) --> (/store/product_by_handle) : 결과 목록에서 상�
 | Home · 검색 드로어 결과·결과 없음 | [기본](details/screens/home.html#default) · [검색 드로어 결과](details/screens/home.html#search-drawer) · [검색 드로어 결과 없음](details/screens/home.html#search-no-results) | [배치·장면](screen-layout.md#home) |
 | Search · 결과·결과 없음 | [기본](details/screens/search.html#default) · [결과](details/screens/search.html#results) · [결과 없음](details/screens/search.html#no-results) | [배치·장면](screen-layout.md#search) |
 | ProductDetail · 기본 | [기본](details/screens/product-detail.html#default) | [배치·장면](screen-layout.md#product-detail) |
+| NotFound · 기본 | [기본](details/screens/not-found.html#default) | [배치·장면](screen-layout.md#not-found) |
 
 <a id="n04"></a>
 ## N04. 상품 상세와 장바구니 담기
