@@ -64,16 +64,18 @@ Collection --> ProductDetail : 상품 카드
 ## N03. 상품 검색
 
 ```navigation
-Home --> Home(SearchDrawer) : 검색 아이콘(JS)
-Home(SearchDrawer) --> (/store/search) : 검색어 입력
-(/store/search) --> Home(SearchDrawer) : 결과 있음
-(/store/search) --> Home(SearchNoResults) : 결과 없음
-Home(SearchDrawer) --> ProductDetail : 결과 선택
-Home --> Search : 검색 아이콘(JS 없음)·푸터 Search
-Search --> (search_query) : 검색어 제출(GET)
-(search_query) --> Search(Results) : 결과 있음
-(search_query) --> Search(NoResults) : 결과 없음
-Search(Results) --> ProductDetail : 결과 선택
+Home --> (check_search_region) : 푸터 Search 또는 JavaScript 없이 헤더 검색 아이콘 선택
+Search --> (check_search_region) : 검색어 입력 후 제출
+Search(ProductResults) --> (check_search_region) : 검색어를 바꿔 다시 제출
+Search(NoResults) --> (check_search_region) : 검색어를 바꿔 다시 제출
+(check_search_region) --> NotFound : URL의 국가 코드에 해당하는 판매 지역 없음
+(check_search_region) --> Search : 판매 지역 있음·검색어 없음, 검색창 표시
+(check_search_region) --> (/store/products) : 판매 지역 있음·검색어 있음, 키워드와 지역 ID 전달
+(/store/products) --> Search(ProductResults) : 일치 상품 있음, 결과 목록 표시
+(/store/products) --> Search(NoResults) : 일치 상품 없음, 안내와 검색창 표시
+Search(ProductResults) --> (/store/product_by_handle) : 결과 목록에서 상품 카드 선택
+(/store/product_by_handle) --> ProductDetail : 상품 있음
+(/store/product_by_handle) --> NotFound : 판매 지역 또는 상품 없음
 ```
 
 - 헤더 검색 아이콘은 JavaScript가 있으면 현재 페이지 위에 검색 드로어를 연다. 그림의 `Home(SearchDrawer)`는 모든 `(main)` 페이지에서 열리는 같은 오버레이를 대표한다.
