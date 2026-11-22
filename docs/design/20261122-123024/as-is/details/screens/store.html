@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>store — Store (/{countryCode}/store)</title>
+  <link rel="stylesheet" href="assets/store.css">
+  <style>
+    .listing { display: flex; flex-direction: column; }
+    .refine { display: flex; flex-direction: column; gap: 48px; padding: 16px 0 16px 24px; margin-bottom: 32px; }
+    @media (min-width: 1024px) {
+      .listing { flex-direction: row; align-items: flex-start; }
+      .refine { width: 250px; flex-shrink: 0; margin-left: 1.675rem; padding-left: 0; }
+    }
+    .refine .label { font-size: 13px; font-weight: 500; color: var(--fg-subtle); }
+    .refine .label.muted { color: var(--fg-muted); }
+    .sort-list { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--fg-subtle); }
+    .sort-list a.on { color: var(--fg-base); margin-left: -23px; }
+    .sort-list a.on::before { content: "●"; font-size: 8px; margin-right: 9px; vertical-align: middle; }
+    .chip { height: 32px; border: 1px solid var(--fg-interactive); border-radius: 4px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; background: #fff; font-size: 13px; }
+    .opt { height: 40px; border: 1px solid var(--border); border-radius: 4px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; background: #fff; font-size: 13px; color: var(--fg-muted); }
+    .opt.on { border-color: var(--fg-interactive); color: var(--fg-base); }
+    .facet { list-style: none; margin: 0; padding: 0 24px 0 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+    .facet label { display: flex; gap: 8px; align-items: flex-start; color: var(--fg-subtle); }
+    .facet label.on { color: var(--fg-base); }
+    .pager { display: flex; justify-content: center; margin-top: 48px; gap: 12px; font-size: 20px; font-weight: 500; color: var(--fg-muted); }
+    .pager .cur { color: var(--fg-base); }
+    .hits { width: 100%; min-width: 0; }
+    .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px 24px; list-style: none; padding: 0; margin: 0; width: 100%; }
+    @media (min-width: 1024px) { .grid4 { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1280px) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
+    .grid4 .meta { display: flex; justify-content: space-between; margin-top: 16px; font-size: 14px; }
+    .grid4 .meta .p { color: var(--fg-muted); }
+    .title2xl { font-size: 24px; line-height: 36px; font-weight: 600; margin-bottom: 32px; }
+
+  </style>
+</head>
+<body data-shell="main" data-cart-count="0">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/store/page.tsx, modules/store/templates/index.tsx, modules/store/components/store-refinements/* (index, current-refinements, option-refinements, price-range, on-sale-toggle, refinement-group, attributes), store-hits/* (index, pagination, price), store-search-box, modules/common/components/filter-radio-group. InstantSearch(routing) 기반, 페이지당 12개 -->
+  <main id="page">
+    <!-- 미확인: 상품 수·패싯 개수·가격 상한은 seed-demo-products.ts의 의사난수(50개, 10~99 EUR)에 따라 정해져 정확한 값은 실행 결과에 의존한다. 아래 수치와 데모 상품명은 예시 -->
+    <section data-scene="default" data-scene-name="전체 상품·필터">
+      <div class="py-6 content-container" data-testid="category-container">
+        <div class="title2xl" style="margin-bottom:32px"><h1 style="font-size:inherit;font-weight:inherit" data-testid="store-page-title">All products</h1></div>
+        <div class="listing">
+        <div class="refine">
+          <div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#filtered">Relevance</a><a href="#filtered">Latest Arrivals</a><a href="#filtered">Price: Low -> High</a><a href="#filtered">Price: High -> Low</a><a href="#filtered">Title: A -> Z</a><a href="#filtered">Title: Z -> A</a></div></div>
+          <div class="stack gap-3" style="padding-right:24px">
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Color</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Black<span class="muted">(14)</span></a><a class="opt" href="#filtered" aria-pressed="false">White<span class="muted">(13)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Fit</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Regular<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Relaxed<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Slim<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Material</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Cotton<span class="muted">(10)</span></a><a class="opt" href="#filtered" aria-pressed="false">Fleece<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Linen<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Merino<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Size</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">L<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">M<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">S<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">XL<span class="muted">(54)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Sleeve</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Long<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Short<span class="muted">(10)</span></a></div></div>
+          </div>
+          <div class="stack gap-4"><span class="label">Price</span>
+            <div class="stack gap-3" style="padding-right:24px">
+              <div style="position:relative;height:20px" aria-label="Price range"><div style="position:absolute;top:9px;left:0;right:0;height:2px;background:var(--border);border-radius:2px"></div><div style="position:absolute;top:9px;left:0%;right:0%;height:2px;background:var(--fg-interactive)"></div><span style="position:absolute;top:2px;left:calc(0% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Minimum price"></span><span style="position:absolute;top:2px;left:calc(100% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Maximum price"></span></div>
+              <div class="row between subtle" style="font-size:13px"><span>€10</span><span>€99</span></div>
+            </div></div>
+          <!-- OnSaleToggle("On sale only"): 할인된 상품이 없으면 canRefine=false로 숨는다. 시드에 가격 목록(price list)이 없어 표시하지 않음 -->
+          <div class="stack gap-3"><span class="label">Category</span><ul class="facet"><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Shirts</span><span class="muted">(15)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Merch</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Sweatshirts</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Pants</span><span class="muted">(12)</span></label></a></li></ul></div>
+          <div class="stack gap-3"><span class="label">Labels</span><ul class="facet"><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>bestseller</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>new-arrival</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>organic</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>sale</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>unisex</span><span class="muted">(11)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>last-chance</span><span class="muted">(10)</span></label></a></li></ul></div>
+        </div>
+        <div class="hits">
+          <div class="row gap-3 mb-6" style="border-bottom:1px solid var(--border)"><span class="search-icon muted" style="flex-shrink:0;transform:scale(.8)"></span><input type="search" value="" placeholder="Search products" aria-label="Search products" style="width:100%;border:0;background:transparent;padding:12px 0;font-size:14px;outline:none"></div>
+          <ul class="grid4" data-testid="products-list">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/tee-black-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa T-Shirt</span><span class="p">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatshirt-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatshirt</span><span class="p">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatpants-gray-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatpants</span><span class="p">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/shorts-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Shorts</span><span class="p">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="p">€42.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Classic Fleece Hoodie</span><span class="p">€67.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Relaxed Linen Sweatshirt</span><span class="p">€35.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Tailored Twill Shorts</span><span class="p">€58.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Oversized Merino Joggers</span><span class="p">€81.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Everyday Denim Overshirt</span><span class="p">€24.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Heritage Cotton Cap</span><span class="p">€19.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Essential Merino Socks</span><span class="p">€12.00</span></div></a></li>
+        </ul>
+          <div class="pager" data-testid="product-pagination"><span class="cur">1</span><a href="#page-2">2</a><a href="#page-2">3</a><span>...</span><a href="#page-2">5</a></div>
+        </div>
+        </div>
+      </div>
+    </section>
+    <section data-scene="filtered" data-scene-name="필터 적용(현재 필터 칩·가격 범위)">
+      <div class="py-6 content-container" data-testid="category-container">
+        <div class="title2xl" style="margin-bottom:32px"><h1 style="font-size:inherit;font-weight:inherit" data-testid="store-page-title">All products</h1></div>
+        <div class="listing">
+        <div class="refine">
+          <div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#filtered">Relevance</a><a href="#filtered">Latest Arrivals</a><a href="#filtered">Price: Low -> High</a><a href="#filtered">Price: High -> Low</a><a href="#filtered">Title: A -> Z</a><a href="#filtered">Title: Z -> A</a></div></div>
+          <div class="stack gap-3" data-testid="current-refinements">
+            <div class="row between gap-2" style="padding-right:24px"><span class="label">Applied filters</span><a class="link" style="font-size:13px;font-weight:500" href="#default" data-testid="clear-refinements">Clear all</a></div>
+            <ul class="row gap-2" style="flex-wrap:wrap;list-style:none;margin:0;padding:0 24px 0 0">
+              <li><a class="chip" href="#default" aria-label="Remove filter Size: M">Size: M <span class="muted">✕</span></a></li>
+              <li><a class="chip" href="#default" aria-label="Remove filter From €20">From €20 <span class="muted">✕</span></a></li>
+              <li><a class="chip" href="#default" aria-label="Remove filter Up to €60">Up to €60 <span class="muted">✕</span></a></li>
+              <li><a class="chip" href="#default" aria-label="Remove filter Category: Shirts">Category: Shirts <span class="muted">✕</span></a></li>
+            </ul>
+          </div>
+          <div class="stack gap-3" style="padding-right:24px">
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Color</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Black<span class="muted">(14)</span></a><a class="opt" href="#filtered" aria-pressed="false">White<span class="muted">(13)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Fit</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Regular<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Relaxed<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Slim<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Material</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Cotton<span class="muted">(10)</span></a><a class="opt" href="#filtered" aria-pressed="false">Fleece<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Linen<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Merino<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Size</span><span class="muted" style="font-size:13px;font-weight:500">(1)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">L<span class="muted">(54)</span></a><a class="opt on" href="#filtered" aria-pressed="true">M<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">S<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">XL<span class="muted">(54)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Sleeve</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Long<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Short<span class="muted">(10)</span></a></div></div>
+          </div>
+          <div class="stack gap-4"><span class="label">Price</span>
+            <div class="stack gap-3" style="padding-right:24px">
+              <div style="position:relative;height:20px" aria-label="Price range"><div style="position:absolute;top:9px;left:0;right:0;height:2px;background:var(--border);border-radius:2px"></div><div style="position:absolute;top:9px;left:11%;right:44%;height:2px;background:var(--fg-interactive)"></div><span style="position:absolute;top:2px;left:calc(11% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Minimum price"></span><span style="position:absolute;top:2px;left:calc(56% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Maximum price"></span></div>
+              <div class="row between subtle" style="font-size:13px"><span>€20</span><span>€60</span></div>
+            </div></div>
+          <!-- OnSaleToggle("On sale only"): 할인된 상품이 없으면 canRefine=false로 숨는다. 시드에 가격 목록(price list)이 없어 표시하지 않음 -->
+          <div class="stack gap-3"><span class="label">Category</span><ul class="facet"><li><a href="#filtered"><label class="on"><input type="checkbox" checked style="margin-top:4px"> <span>Shirts</span><span class="muted">(15)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Merch</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Sweatshirts</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Pants</span><span class="muted">(12)</span></label></a></li></ul></div>
+          <div class="stack gap-3"><span class="label">Labels</span><ul class="facet"><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>bestseller</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>new-arrival</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>organic</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>sale</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>unisex</span><span class="muted">(11)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>last-chance</span><span class="muted">(10)</span></label></a></li></ul></div>
+        </div>
+        <div class="hits">
+          <div class="row gap-3 mb-6" style="border-bottom:1px solid var(--border)"><span class="search-icon muted" style="flex-shrink:0;transform:scale(.8)"></span><input type="search" value="" placeholder="Search products" aria-label="Search products" style="width:100%;border:0;background:transparent;padding:12px 0;font-size:14px;outline:none"></div>
+          <ul class="grid4" data-testid="products-list">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/tee-black-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa T-Shirt</span><span class="p">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="p">€42.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Everyday Denim Overshirt</span><span class="p">€24.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Classic Cotton Tee</span><span class="p">€29.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Relaxed Denim Sweatshirt</span><span class="p">€55.00</span></div></a></li>
+        </ul>
+          <!-- 결과가 1페이지 이하이면 페이지네이션 숨김(nbPages <= 1) -->
+        </div>
+        </div>
+      </div>
+    </section>
+    <section data-scene="no-results" data-scene-name="결과 없음">
+      <div class="py-6 content-container" data-testid="category-container">
+        <div class="title2xl" style="margin-bottom:32px"><h1 style="font-size:inherit;font-weight:inherit" data-testid="store-page-title">All products</h1></div>
+        <div class="listing">
+        <div class="refine">
+          <div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#filtered">Relevance</a><a href="#filtered">Latest Arrivals</a><a href="#filtered">Price: Low -> High</a><a href="#filtered">Price: High -> Low</a><a href="#filtered">Title: A -> Z</a><a href="#filtered">Title: Z -> A</a></div></div>
+          <div class="stack gap-3" style="padding-right:24px">
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Color</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Black<span class="muted">(14)</span></a><a class="opt" href="#filtered" aria-pressed="false">White<span class="muted">(13)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Fit</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Regular<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Relaxed<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Slim<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Material</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Cotton<span class="muted">(10)</span></a><a class="opt" href="#filtered" aria-pressed="false">Fleece<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Linen<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Merino<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Size</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">L<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">M<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">S<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">XL<span class="muted">(54)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Sleeve</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Long<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Short<span class="muted">(10)</span></a></div></div>
+          </div>
+          <div class="stack gap-4"><span class="label">Price</span>
+            <div class="stack gap-3" style="padding-right:24px">
+              <div style="position:relative;height:20px" aria-label="Price range"><div style="position:absolute;top:9px;left:0;right:0;height:2px;background:var(--border);border-radius:2px"></div><div style="position:absolute;top:9px;left:0%;right:0%;height:2px;background:var(--fg-interactive)"></div><span style="position:absolute;top:2px;left:calc(0% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Minimum price"></span><span style="position:absolute;top:2px;left:calc(100% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Maximum price"></span></div>
+              <div class="row between subtle" style="font-size:13px"><span>€10</span><span>€99</span></div>
+            </div></div>
+          <!-- OnSaleToggle("On sale only"): 할인된 상품이 없으면 canRefine=false로 숨는다. 시드에 가격 목록(price list)이 없어 표시하지 않음 -->
+          <div class="stack gap-3"><span class="label">Category</span><ul class="facet"><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Shirts</span><span class="muted">(15)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Merch</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Sweatshirts</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Pants</span><span class="muted">(12)</span></label></a></li></ul></div>
+          <div class="stack gap-3"><span class="label">Labels</span><ul class="facet"><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>bestseller</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>new-arrival</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>organic</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>sale</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>unisex</span><span class="muted">(11)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>last-chance</span><span class="muted">(10)</span></label></a></li></ul></div>
+        </div>
+        <div class="hits">
+          <div class="row gap-3 mb-6" style="border-bottom:1px solid var(--border)"><span class="search-icon muted" style="flex-shrink:0;transform:scale(.8)"></span><input type="search" value="zzz" placeholder="Search products" aria-label="Search products" style="width:100%;border:0;background:transparent;padding:12px 0;font-size:14px;outline:none"><a href="#default" aria-label="Clear search" class="muted">✕</a></div>
+          <p class="subtle" style="padding:64px 0;text-align:center" data-testid="no-products">No products matched these filters.</p>
+          <!-- 결과 0건: nbPages<=1이라 페이지네이션 없음 -->
+        </div>
+        </div>
+      </div>
+    </section>
+    <section data-scene="page-2" data-scene-name="2페이지">
+      <div class="py-6 content-container" data-testid="category-container">
+        <div class="title2xl" style="margin-bottom:32px"><h1 style="font-size:inherit;font-weight:inherit" data-testid="store-page-title">All products</h1></div>
+        <div class="listing">
+        <div class="refine">
+          <div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#filtered">Relevance</a><a href="#filtered">Latest Arrivals</a><a href="#filtered">Price: Low -> High</a><a href="#filtered">Price: High -> Low</a><a href="#filtered">Title: A -> Z</a><a href="#filtered">Title: Z -> A</a></div></div>
+          <div class="stack gap-3" style="padding-right:24px">
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Color</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Black<span class="muted">(14)</span></a><a class="opt" href="#filtered" aria-pressed="false">White<span class="muted">(13)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Fit</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Regular<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Relaxed<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Slim<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Material</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Cotton<span class="muted">(10)</span></a><a class="opt" href="#filtered" aria-pressed="false">Fleece<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Linen<span class="muted">(8)</span></a><a class="opt" href="#filtered" aria-pressed="false">Merino<span class="muted">(8)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Size</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">L<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">M<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">S<span class="muted">(54)</span></a><a class="opt" href="#filtered" aria-pressed="false">XL<span class="muted">(54)</span></a></div></div>
+            <div><div class="row between" style="padding:12px 0"><span class="row gap-2"><span style="font-size:13px;font-weight:500">Sleeve</span><span class="muted" style="font-size:13px;font-weight:500">(0)</span></span><span class="muted" style="width:28px;text-align:center">⌃</span></div>
+              <div class="row gap-2" style="flex-wrap:wrap;padding:4px 0 16px"><a class="opt" href="#filtered" aria-pressed="false">Long<span class="muted">(9)</span></a><a class="opt" href="#filtered" aria-pressed="false">Short<span class="muted">(10)</span></a></div></div>
+          </div>
+          <div class="stack gap-4"><span class="label">Price</span>
+            <div class="stack gap-3" style="padding-right:24px">
+              <div style="position:relative;height:20px" aria-label="Price range"><div style="position:absolute;top:9px;left:0;right:0;height:2px;background:var(--border);border-radius:2px"></div><div style="position:absolute;top:9px;left:0%;right:0%;height:2px;background:var(--fg-interactive)"></div><span style="position:absolute;top:2px;left:calc(0% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Minimum price"></span><span style="position:absolute;top:2px;left:calc(100% - 8px);width:16px;height:16px;border-radius:50%;border:1px solid var(--fg-interactive);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1)" aria-label="Maximum price"></span></div>
+              <div class="row between subtle" style="font-size:13px"><span>€10</span><span>€99</span></div>
+            </div></div>
+          <!-- OnSaleToggle("On sale only"): 할인된 상품이 없으면 canRefine=false로 숨는다. 시드에 가격 목록(price list)이 없어 표시하지 않음 -->
+          <div class="stack gap-3"><span class="label">Category</span><ul class="facet"><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Shirts</span><span class="muted">(15)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Merch</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Sweatshirts</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>Pants</span><span class="muted">(12)</span></label></a></li></ul></div>
+          <div class="stack gap-3"><span class="label">Labels</span><ul class="facet"><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>bestseller</span><span class="muted">(14)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>new-arrival</span><span class="muted">(13)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>organic</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>sale</span><span class="muted">(12)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>unisex</span><span class="muted">(11)</span></label></a></li><li><a href="#filtered"><label class=""><input type="checkbox" style="margin-top:4px"> <span>last-chance</span><span class="muted">(10)</span></label></a></li></ul></div>
+        </div>
+        <div class="hits">
+          <div class="row gap-3 mb-6" style="border-bottom:1px solid var(--border)"><span class="search-icon muted" style="flex-shrink:0;transform:scale(.8)"></span><input type="search" value="" placeholder="Search products" aria-label="Search products" style="width:100%;border:0;background:transparent;padding:12px 0;font-size:14px;outline:none"></div>
+          <ul class="grid4" data-testid="products-list">
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Cropped Linen Tote</span><span class="p">€73.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Lightweight Fleece Beanie</span><span class="p">€46.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Classic Cotton Tee</span><span class="p">€29.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Twill Hoodie</span><span class="p">€90.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Relaxed Denim Sweatshirt</span><span class="p">€55.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Everyday Linen Shorts</span><span class="p">€38.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Tailored Cotton Joggers</span><span class="p">€63.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Essential Fleece Overshirt</span><span class="p">€47.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Heritage Linen Cap</span><span class="p">€21.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Oversized Twill Socks</span><span class="p">€15.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Cropped Merino Tote</span><span class="p">€84.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Lightweight Denim Beanie</span><span class="p">€33.00</span></div></a></li>
+        </ul>
+          <div class="pager" data-testid="product-pagination"><a href="#default">1</a><span class="cur">2</span><a href="#page-2">3</a><a href="#page-2">4</a><a href="#page-2">5</a></div>
+        </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>collection — Collection (/{countryCode}/collections/[handle])</title>
+  <link rel="stylesheet" href="assets/store.css">
+  <style>
+    .listing { display: flex; flex-direction: column; }
+    .refine { display: flex; flex-direction: column; gap: 48px; padding: 16px 0 16px 24px; margin-bottom: 32px; }
+    @media (min-width: 1024px) {
+      .listing { flex-direction: row; align-items: flex-start; }
+      .refine { width: 250px; flex-shrink: 0; margin-left: 1.675rem; padding-left: 0; }
+    }
+    .refine .label { font-size: 13px; font-weight: 500; color: var(--fg-subtle); }
+    .refine .label.muted { color: var(--fg-muted); }
+    .sort-list { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--fg-subtle); }
+    .sort-list a.on { color: var(--fg-base); margin-left: -23px; }
+    .sort-list a.on::before { content: "●"; font-size: 8px; margin-right: 9px; vertical-align: middle; }
+    .chip { height: 32px; border: 1px solid var(--fg-interactive); border-radius: 4px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; background: #fff; font-size: 13px; }
+    .opt { height: 40px; border: 1px solid var(--border); border-radius: 4px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; background: #fff; font-size: 13px; color: var(--fg-muted); }
+    .opt.on { border-color: var(--fg-interactive); color: var(--fg-base); }
+    .facet { list-style: none; margin: 0; padding: 0 24px 0 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+    .facet label { display: flex; gap: 8px; align-items: flex-start; color: var(--fg-subtle); }
+    .facet label.on { color: var(--fg-base); }
+    .pager { display: flex; justify-content: center; margin-top: 48px; gap: 12px; font-size: 20px; font-weight: 500; color: var(--fg-muted); }
+    .pager .cur { color: var(--fg-base); }
+    .hits { width: 100%; min-width: 0; }
+    .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px 24px; list-style: none; padding: 0; margin: 0; width: 100%; }
+    @media (min-width: 1024px) { .grid4 { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1280px) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
+    .grid4 .meta { display: flex; justify-content: space-between; margin-top: 16px; font-size: 14px; }
+    .grid4 .meta .p { color: var(--fg-muted); }
+    .title2xl { font-size: 24px; line-height: 36px; font-weight: 600; margin-bottom: 32px; }
+
+  </style>
+</head>
+<body data-shell="main" data-cart-count="0">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/collections/[handle]/page.tsx, modules/collections/templates/index.tsx, modules/store/components/refinement-list (sort-products), modules/store/templates/paginated-products.tsx, modules/store/components/pagination, modules/products/components/product-preview -->
+  <main id="page">
+    <!-- 미확인: 데모 컬렉션별 상품 배정은 의사난수라 상품명·개수는 예시. 13개 이상이면 아래 페이지네이션이 나타난다 -->
+    <section data-scene="default" data-scene-name="상품 목록">
+
+      <div class="listing py-6 content-container">
+        <div class="refine"><div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#default">Latest Arrivals</a><a href="#default">Price: Low -> High</a><a href="#default">Price: High -> Low</a></div></div></div>
+        <div class="w-full">
+          <div class="title2xl"><h1 style="font-size:inherit;font-weight:inherit">Summer Essentials</h1></div>
+          <ul class="grid4" data-testid="products-list">
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="p">€42.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Tailored Twill Shorts</span><span class="p">€58.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Heritage Cotton Cap</span><span class="p">€19.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Cropped Linen Tote</span><span class="p">€73.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Everyday Linen Shorts</span><span class="p">€38.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Classic Cotton Tee</span><span class="p">€29.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Essential Merino Socks</span><span class="p">€12.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Lightweight Fleece Beanie</span><span class="p">€46.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Relaxed Linen Sweatshirt</span><span class="p">€35.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Oversized Merino Joggers</span><span class="p">€81.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Everyday Denim Overshirt</span><span class="p">€24.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Twill Hoodie</span><span class="p">€90.00</span></div></a></li>
+        </ul>
+          <div class="pager" data-testid="product-pagination"><span class="cur">1</span><a href="#default">2</a></div>
+        </div>
+      </div>
+    </section>
+    <section data-scene="empty" data-scene-name="상품 없음">
+      <!-- 상품이 0개면 빈 그리드만 렌더된다(안내 문구 없음) -->
+      <div class="listing py-6 content-container">
+        <div class="refine"><div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#empty">Latest Arrivals</a><a href="#empty">Price: Low -> High</a><a href="#empty">Price: High -> Low</a></div></div></div>
+        <div class="w-full">
+          <div class="title2xl"><h1 style="font-size:inherit;font-weight:inherit">Limited Run</h1></div>
+          <ul class="grid4" data-testid="products-list"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

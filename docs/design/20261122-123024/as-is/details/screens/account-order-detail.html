@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>account-order-detail — Order #1 (/{countryCode}/account/orders/details/[id])</title>
+  <link rel="stylesheet" href="assets/store.css">
+<style>.acct-grid-od{display:grid;grid-template-columns:minmax(0,1fr);padding:48px 0}@media (min-width:1024px){.acct-grid-od{grid-template-columns:240px minmax(0,1fr)}}</style>
+</head>
+<body data-shell="main" data-cart-count="0" data-logged-in="true">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/account/layout.tsx, account/@dashboard/orders/details/[id]/page.tsx, modules/account/templates/account-layout.tsx,
+       modules/account/components/account-nav, modules/order/templates/order-details-template.tsx, modules/order/components/order-details, items, item, shipping-details, order-summary, help -->
+  <!-- 주문 조회 실패 시 notFound() → not-found.html#default. 탭 제목은 "Order #1" -->
+  <main id="page">
+    <section data-scene="default" data-scene-name="주문 상세">
+      <div style="padding:48px 0">
+        <div class="content-container stack" style="max-width:1024px;background:#fff">
+          <div class="acct-grid-od">
+            <div>
+              <!-- 데스크톱 계정 내비. 작은 화면에서는 "‹ Account" 링크(→ 계정 개요)만 보인다. 경로가 /account/orders/details/... 이므로 굵게 강조되는 항목이 없다 -->
+              <div style="padding-bottom:16px"><h3 class="semi" style="font-size:16px">Account</h3></div>
+              <ul class="stack gap-4" style="list-style:none;padding:0;margin:0;font-size:16px">
+                <li><a class="subtle" href="account-overview.html">Overview</a></li>
+                <li><a class="subtle" href="account-profile.html">Profile</a></li>
+                <li><a class="subtle" href="account-addresses.html">Addresses</a></li>
+                <li><a class="subtle" href="account-orders.html">Orders</a></li>
+                <li><a href="account-login.html">Log out</a><!-- 실제로는 button: signout 후 로그인 화면으로 이동 --></li>
+              </ul>
+            </div>
+            <div class="stack gap-4" style="justify-content:center">
+              <div class="row between gap-2">
+                <h1 class="h1">Order details</h1>
+                <a class="row gap-2 subtle" href="account-orders.html"><span aria-hidden="true">✕</span> Back to overview</a>
+              </div>
+              <div class="stack gap-4" style="background:#fff">
+                <div>
+                  <p>We have sent the order confirmation details to <span class="semi">customer@example.com</span>.</p>
+                  <p style="margin-top:8px">Order date: <span>Sat Nov 14 2026</span></p>
+                  <p style="margin-top:8px" class="link">Order number: <span>1</span></p>
+                  <div class="row gap-4 small" style="margin-top:16px">
+                    <span>Order status: <span class="subtle">Not fulfilled</span></span>
+                    <span>Payment status: <span class="subtle">Authorized</span></span>
+                    <!-- 상태 문구는 fulfillment_status/payment_status 값의 "_"를 공백으로 바꾸고 첫 글자를 대문자로 만든 것. 예시 값은 수동 결제 직후 기준 추정(미확인: 실제 값은 서버 상태에 따름) -->
+                  </div>
+                </div>
+                <div class="stack">
+                  <hr class="divider">
+                  <table class="items"><tbody>
+                    <tr>
+                      <td style="width:96px"><div style="display:flex;width:64px"><span class="thumb square" style="width:64px"><img class="seed-photo" src="assets/tee-black-front.webp" alt=""></span></div></td>
+                      <td><div style="font-weight:500">Medusa T-Shirt</div><div class="subtle">Variant: S / Black</div></td>
+                      <td style="text-align:right"><div class="row gap-1" style="justify-content:flex-end"><span class="muted">1x </span><span class="subtle">€10.00</span></div><div>€10.00</div></td>
+                    </tr>
+                  </tbody></table>
+                </div>
+                <div>
+                  <h2 style="font-size:30px;line-height:36px;font-weight:400;margin:24px 0">Delivery</h2>
+                  <div class="row gap-8" style="align-items:flex-start">
+                    <div class="stack" style="width:33%"><span style="font-weight:500;margin-bottom:4px">Shipping Address</span>
+                      <span class="subtle">Jane Doe</span><span class="subtle">Nørregade 1 </span><span class="subtle">1165, Copenhagen</span><span class="subtle">DK</span></div>
+                    <div class="stack" style="width:33%"><span style="font-weight:500;margin-bottom:4px">Contact</span>
+                      <span class="subtle"></span><span class="subtle">customer@example.com</span></div>
+                    <div class="stack" style="width:33%"><span style="font-weight:500;margin-bottom:4px">Method</span>
+                      <span class="subtle">Standard Shipping (€10.00)</span></div>
+                  </div>
+                  <hr class="divider" style="margin-top:32px">
+                </div>
+                <div>
+                  <h2 class="semi" style="font-size:16px">Order Summary</h2>
+                  <div class="small" style="margin:8px 0">
+                    <div class="row between" style="font-size:14px;margin-bottom:8px"><span>Subtotal</span><span>€10.00</span></div>
+                    <div class="stack gap-1">
+                      <div class="row between"><span>Shipping</span><span>€10.00</span></div>
+                      <div class="row between"><span>Taxes</span><span></span></div>
+                      <!-- getAmount()는 금액이 0이면 아무것도 반환하지 않아 Taxes 금액 칸이 비어 보인다. 할인·기프트카드 금액이 있으면 "Discount - €x" 행이 추가된다 -->
+                    </div>
+                    <div style="border-bottom:1px dashed var(--border);margin:16px 0"></div>
+                    <div class="row between" style="font-size:14px;margin-bottom:8px"><span>Total</span><span>€20.00</span></div>
+                  </div>
+                </div>
+                <div style="margin-top:24px">
+                  <h3 class="semi" style="font-size:16px">Need help?</h3>
+                  <ul class="stack gap-2" style="list-style:none;padding:0;margin:8px 0">
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="contact.html">Returns &amp; Exchanges</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row between gap-8" style="align-items:flex-end;border-top:1px solid var(--border);padding:48px 0">
+            <div>
+              <h3 class="semi mb-4" style="font-size:20px">Got questions?</h3>
+              <span>You can find frequently asked questions and answers on our customer service page.</span>
+            </div>
+            <div>
+              <!-- 실제 링크는 /{cc}/customer-service. 해당 경로의 페이지가 없어 404로 이어진다 -->
+              <a class="row gap-1" href="not-found.html"><span class="link">Customer Service</span><span class="link" aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

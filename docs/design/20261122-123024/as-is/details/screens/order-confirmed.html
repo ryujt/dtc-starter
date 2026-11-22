@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>order-confirmed — Order Confirmed (/{countryCode}/order/[id]/confirmed)</title>
+  <link rel="stylesheet" href="assets/store.css">
+</head>
+<body data-shell="main" data-cart-count="0">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/order/[id]/confirmed/page.tsx, confirmed/loading.tsx, modules/order/templates/order-completed-template.tsx,
+       modules/order/components/onboarding-cta, order-details, items, item, shipping-details, payment-details, help, modules/common/components/cart-totals, line-item-options,
+       modules/skeletons/templates/skeleton-order-confirmed, skeletons/components/skeleton-order-confirmed-header, skeleton-order-items, skeleton-order-information, skeleton-cart-totals, lib/constants.tsx -->
+  <!-- 주문 조회 실패 시 notFound() → not-found.html#default -->
+  <main id="page">
+    <section data-scene="default" data-scene-name="주문 완료">
+      <div class="py-6" style="min-height:calc(100vh - 64px)">
+        <div class="content-container stack gap-8" style="max-width:896px;align-items:center">
+          <!-- _medusa_onboarding 쿠키가 "true"일 때만 위에 온보딩 박스가 추가된다:
+               "Your test order was successfully created! 🎉" / "You can now complete setting up your store in the admin." / [Complete setup in admin] 버튼 -->
+          <div class="stack gap-4 w-full" style="padding:40px 0;background:#fff">
+            <h1 class="stack gap-3" style="font-size:30px;line-height:36px;font-weight:400;margin-bottom:16px">
+              <span>Thank you!</span>
+              <span>Your order was placed successfully.</span>
+            </h1>
+            <div>
+              <p>We have sent the order confirmation details to <span class="semi">customer@example.com</span>.</p>
+              <p style="margin-top:8px">Order date: <span>Sat Nov 14 2026</span></p>
+              <p style="margin-top:8px" class="link">Order number: <span>1</span></p>
+              <div class="row gap-4 small" style="margin-top:16px"></div>
+            </div>
+            <h2 style="font-size:30px;line-height:36px;font-weight:400">Summary</h2>
+            <div class="stack">
+              <hr class="divider">
+              <table class="items"><tbody>
+                <tr>
+                  <td style="width:96px"><div style="display:flex;width:64px"><span class="thumb square" style="width:64px"><img class="seed-photo" src="assets/tee-black-front.webp" alt=""></span></div></td>
+                  <td><div style="font-weight:500">Medusa T-Shirt</div><div class="subtle">Variant: S / Black</div></td>
+                  <td style="text-align:right"><div class="row gap-1" style="justify-content:flex-end"><span class="muted">1x </span><span class="subtle">€10.00</span></div><div>€10.00</div></td>
+                </tr>
+              </tbody></table>
+            </div>
+            <div>
+              <div class="stack gap-2 subtle">
+                <div class="row between"><span>Subtotal (excl. shipping and taxes)</span><span>€10.00</span></div>
+                <div class="row between"><span>Shipping</span><span>€10.00</span></div>
+                <div class="row between"><span>Taxes</span><span>€0.00</span></div>
+              </div>
+              <hr class="divider" style="margin:16px 0">
+              <div class="row between" style="margin-bottom:8px"><span>Total</span><span style="font-size:20px;font-weight:500">€20.00</span></div>
+              <hr class="divider" style="margin-top:16px">
+            </div>
+            <div>
+              <h2 style="font-size:30px;line-height:36px;font-weight:400;margin:24px 0">Delivery</h2>
+              <div class="row gap-8" style="align-items:flex-start">
+                <div class="stack" style="width:33%"><span style="font-weight:500;margin-bottom:4px">Shipping Address</span>
+                  <span class="subtle">Jane Doe</span><span class="subtle">Nørregade 1 </span><span class="subtle">1165, Copenhagen</span><span class="subtle">DK</span></div>
+                <div class="stack" style="width:33%"><span style="font-weight:500;margin-bottom:4px">Contact</span>
+                  <span class="subtle"></span><span class="subtle">customer@example.com</span></div>
+                <div class="stack" style="width:33%"><span style="font-weight:500;margin-bottom:4px">Method</span>
+                  <span class="subtle">Standard Shipping (€10.00)</span></div>
+              </div>
+              <hr class="divider" style="margin-top:32px">
+            </div>
+            <div>
+              <h2 style="font-size:30px;line-height:36px;font-weight:400;margin:24px 0">Payment</h2>
+              <div class="row gap-1" style="align-items:flex-start">
+                <div class="stack" style="width:33%"><span style="font-weight:500;margin-bottom:4px">Payment method</span><span class="subtle">Manual Payment</span></div>
+                <div class="stack" style="width:66%"><span style="font-weight:500;margin-bottom:4px">Payment details</span>
+                  <span class="row gap-2 subtle"><span style="display:inline-flex;align-items:center;height:28px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg-component)">&#128179;</span>
+                  €20.00 paid at 11/14/2026, 10:33:10 PM</span>
+                  <!-- 결제 일시는 브라우저 로캘의 toLocaleString() 형식. Stripe 계열 결제에 card_last4가 있으면 "**** **** **** 4242" 형식으로 표시 -->
+                </div>
+              </div>
+              <hr class="divider" style="margin-top:32px">
+            </div>
+            <div style="margin-top:24px">
+              <h3 class="semi" style="font-size:16px">Need help?</h3>
+              <ul class="stack gap-2" style="list-style:none;padding:0;margin:8px 0">
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="contact.html">Returns &amp; Exchanges</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section data-scene="loading" data-scene-name="로딩">
+      <div style="background:#f9fafb;padding:24px 0;min-height:calc(100vh - 64px)">
+        <div class="content-container" style="display:flex;justify-content:center">
+          <div class="w-full" style="max-width:896px;background:#fff;padding:40px">
+            <div class="stack gap-2" style="padding-bottom:40px">
+              <div class="skeleton" style="width:40%;height:16px"></div>
+              <div class="skeleton" style="width:50%;height:24px"></div>
+              <div class="row gap-4"><div class="skeleton" style="width:64px;height:16px"></div><div class="skeleton" style="width:48px;height:16px"></div></div>
+            </div>
+            <div class="stack gap-4" style="padding:40px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+              <div style="display:grid;grid-template-columns:122px 1fr;gap:16px"><div class="skeleton" style="aspect-ratio:29/34"></div><div class="row between" style="align-items:flex-start"><div class="stack gap-2"><div class="skeleton" style="width:192px;height:24px"></div><div class="skeleton" style="width:96px;height:16px"></div><div class="skeleton" style="width:128px;height:16px"></div></div><div class="skeleton" style="width:128px;height:24px"></div></div></div>
+              <div style="display:grid;grid-template-columns:122px 1fr;gap:16px"><div class="skeleton" style="aspect-ratio:29/34"></div><div class="row between" style="align-items:flex-start"><div class="stack gap-2"><div class="skeleton" style="width:192px;height:24px"></div><div class="skeleton" style="width:96px;height:16px"></div><div class="skeleton" style="width:128px;height:16px"></div></div><div class="skeleton" style="width:128px;height:24px"></div></div></div>
+              <div style="display:grid;grid-template-columns:122px 1fr;gap:16px"><div class="skeleton" style="aspect-ratio:29/34"></div><div class="row between" style="align-items:flex-start"><div class="stack gap-2"><div class="skeleton" style="width:192px;height:24px"></div><div class="skeleton" style="width:96px;height:16px"></div><div class="skeleton" style="width:128px;height:16px"></div></div><div class="skeleton" style="width:128px;height:24px"></div></div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:40px 0;border-bottom:1px solid var(--border)">
+              <div class="stack"><div class="skeleton mb-4" style="width:128px;height:16px"></div><div class="skeleton" style="width:33%;height:12px"></div><div class="skeleton" style="width:50%;height:12px;margin:8px 0"></div><div class="skeleton" style="width:16%;height:12px"></div></div>
+              <div class="stack"><div class="skeleton mb-4" style="width:128px;height:16px"></div><div class="skeleton" style="width:33%;height:12px"></div><div class="skeleton" style="width:50%;height:12px;margin:8px 0"></div><div class="skeleton" style="width:33%;height:12px"></div><div class="skeleton" style="width:16%;height:12px;margin-top:8px"></div><div class="skeleton" style="width:128px;height:16px;margin:16px 0"></div><div class="skeleton" style="width:16%;height:12px"></div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:40px 0">
+              <div class="stack"><div class="skeleton mb-4" style="width:128px;height:16px"></div><div class="skeleton" style="width:33%;height:12px"></div><div class="skeleton" style="width:50%;height:12px;margin:16px 0"></div></div>
+              <div class="stack">
+                <div class="skeleton mb-4" style="width:128px;height:16px"></div>
+                <div class="row between"><div class="skeleton" style="width:128px;height:12px"></div><div class="skeleton" style="width:128px;height:12px"></div></div>
+                <div class="row between" style="margin:16px 0"><div class="skeleton" style="width:96px;height:12px"></div><div class="skeleton" style="width:96px;height:12px"></div></div>
+                <div class="row between"><div class="skeleton" style="width:112px;height:12px"></div><div class="skeleton" style="width:80px;height:12px"></div></div>
+                <div style="border-bottom:1px dashed var(--border);margin:16px 0"></div>
+                <div class="row between"><div class="skeleton mb-4" style="width:128px;height:24px"></div><div class="skeleton mb-4" style="width:96px;height:24px"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

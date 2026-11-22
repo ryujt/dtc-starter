@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>category — Category (/{countryCode}/categories/[...category])</title>
+  <link rel="stylesheet" href="assets/store.css">
+  <style>
+    .listing { display: flex; flex-direction: column; }
+    .refine { display: flex; flex-direction: column; gap: 48px; padding: 16px 0 16px 24px; margin-bottom: 32px; }
+    @media (min-width: 1024px) {
+      .listing { flex-direction: row; align-items: flex-start; }
+      .refine { width: 250px; flex-shrink: 0; margin-left: 1.675rem; padding-left: 0; }
+    }
+    .refine .label { font-size: 13px; font-weight: 500; color: var(--fg-subtle); }
+    .refine .label.muted { color: var(--fg-muted); }
+    .sort-list { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--fg-subtle); }
+    .sort-list a.on { color: var(--fg-base); margin-left: -23px; }
+    .sort-list a.on::before { content: "●"; font-size: 8px; margin-right: 9px; vertical-align: middle; }
+    .chip { height: 32px; border: 1px solid var(--fg-interactive); border-radius: 4px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; background: #fff; font-size: 13px; }
+    .opt { height: 40px; border: 1px solid var(--border); border-radius: 4px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; background: #fff; font-size: 13px; color: var(--fg-muted); }
+    .opt.on { border-color: var(--fg-interactive); color: var(--fg-base); }
+    .facet { list-style: none; margin: 0; padding: 0 24px 0 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+    .facet label { display: flex; gap: 8px; align-items: flex-start; color: var(--fg-subtle); }
+    .facet label.on { color: var(--fg-base); }
+    .pager { display: flex; justify-content: center; margin-top: 48px; gap: 12px; font-size: 20px; font-weight: 500; color: var(--fg-muted); }
+    .pager .cur { color: var(--fg-base); }
+    .hits { width: 100%; min-width: 0; }
+    .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px 24px; list-style: none; padding: 0; margin: 0; width: 100%; }
+    @media (min-width: 1024px) { .grid4 { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1280px) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
+    .grid4 .meta { display: flex; justify-content: space-between; margin-top: 16px; font-size: 14px; }
+    .grid4 .meta .p { color: var(--fg-muted); }
+    .title2xl { font-size: 24px; line-height: 36px; font-weight: 600; margin-bottom: 32px; }
+
+  </style>
+</head>
+<body data-shell="main" data-cart-count="0">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/categories/[...category]/page.tsx, modules/categories/templates/index.tsx, modules/store/components/refinement-list (sort-products), modules/store/templates/paginated-products.tsx, modules/store/components/pagination, modules/products/components/product-preview, modules/common/components/interactive-link -->
+  <main id="page">
+    <!-- 정렬 변경은 ?sortBy= 쿼리, 페이지는 ?page= 쿼리로 서버 재렌더(PaginatedProducts, 페이지당 12개). 옵션 선택기(OptionsPicker)는 hideOptionsPicker로 숨김. 설명(category.description)은 시드에 없어 표시하지 않음 -->
+    <section data-scene="default" data-scene-name="상품 목록·하위 카테고리">
+      <!-- 미확인: 시드 카테고리(Shirts, Sweatshirts, Pants, Merch)는 하위 카테고리가 없다. category_children가 빈 배열이면 빈 목록만 렌더된다. 하위 카테고리 링크(InteractiveLink)는 관리자에서 하위 카테고리를 만든 경우의 예시 -->
+      <div class="listing py-6 content-container" data-testid="category-container">
+        <div class="refine"><div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#default">Latest Arrivals</a><a href="#default">Price: Low -> High</a><a href="#default">Price: High -> Low</a></div></div></div>
+        <div class="w-full">
+          <div class="row gap-4 title2xl"><h1 style="font-size:inherit;font-weight:inherit" data-testid="category-page-title">Shirts</h1></div>
+          <div class="mb-8" style="font-size:16px"><ul style="list-style:none;margin:0;padding:0;display:grid;gap:8px"><li><a class="link" href="category.html#child">T-Shirts ↗</a></li><li><a class="link" href="category.html#child">Polos ↗</a></li></ul></div>
+          <ul class="grid4" data-testid="products-list">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/tee-black-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa T-Shirt</span><span class="p">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="p">€42.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Everyday Denim Overshirt</span><span class="p">€24.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Classic Cotton Tee</span><span class="p">€29.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Heritage Cotton Cap</span><span class="p">€19.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Cropped Linen Tote</span><span class="p">€73.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Relaxed Denim Sweatshirt</span><span class="p">€55.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Essential Merino Socks</span><span class="p">€12.00</span></div></a></li>
+        </ul>
+        </div>
+      </div>
+    </section>
+    <section data-scene="child" data-scene-name="하위 카테고리(상위 링크 표시)">
+      <!-- 미확인: 하위 카테고리 'T-Shirts'는 예시 이름. 상위 카테고리는 'Shirts /' 링크로 제목 앞에 표시된다 -->
+      <div class="listing py-6 content-container" data-testid="category-container">
+        <div class="refine"><div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#child">Latest Arrivals</a><a href="#child">Price: Low -> High</a><a href="#child">Price: High -> Low</a></div></div></div>
+        <div class="w-full">
+          <div class="row gap-4 title2xl"><span class="subtle"><a style="margin-right:16px" href="category.html">Shirts</a>/</span><h1 style="font-size:inherit;font-weight:inherit" data-testid="category-page-title">T-Shirts</h1></div>
+
+          <ul class="grid4" data-testid="products-list">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/tee-black-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa T-Shirt</span><span class="p">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="p">€42.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Everyday Denim Overshirt</span><span class="p">€24.00</span></div></a></li>
+        </ul>
+        </div>
+      </div>
+    </section>
+    <section data-scene="empty" data-scene-name="상품 없음">
+      <!-- 상품이 0개면 빈 그리드만 렌더된다(별도 안내 문구 없음). 페이지네이션도 없음(totalPages<=1) -->
+      <div class="listing py-6 content-container" data-testid="category-container">
+        <div class="refine"><div class="stack gap-3" data-testid="sort-by-container"><span class="label muted">Sort by</span><div class="sort-list"><a class="on" href="#empty">Latest Arrivals</a><a href="#empty">Price: Low -> High</a><a href="#empty">Price: High -> Low</a></div></div></div>
+        <div class="w-full">
+          <div class="row gap-4 title2xl"><h1 style="font-size:inherit;font-weight:inherit" data-testid="category-page-title">Pants</h1></div>
+
+          <ul class="grid4" data-testid="products-list"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

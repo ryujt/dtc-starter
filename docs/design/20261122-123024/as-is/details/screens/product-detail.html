@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>product-detail — Product (/{countryCode}/products/[handle])</title>
+  <link rel="stylesheet" href="assets/store.css">
+  <style>
+    .pd { display: flex; flex-direction: column; padding-top: 24px; padding-bottom: 24px; }
+    .pd .col-side { display: flex; flex-direction: column; width: 100%; padding: 32px 0; }
+    .pd .col-info { gap: 24px; }
+    .pd .col-actions { gap: 48px; }
+    .pd .gallery { display: flex; flex-direction: column; gap: 16px; flex: 1; width: 100%; }
+    .pd .gallery .img { aspect-ratio: 29/34; background: linear-gradient(135deg, #f4f4f5, #e4e4e7); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--fg-muted); font-size: 12px; }
+    @media (min-width: 1024px) {
+      .pd { flex-direction: row; align-items: flex-start; }
+      .pd .col-side { position: sticky; top: 192px; padding: 0; max-width: 300px; }
+      .pd .gallery { margin: 0 64px; }
+    }
+    .acc-item { border-top: 1px solid var(--border); padding: 12px 4px; }
+    .acc-item:last-child { border-bottom: 1px solid var(--border); }
+    .acc-head { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--fg-subtle); }
+    .opt-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+    .opt-grid label { flex: 1; display: flex; align-items: center; justify-content: center; height: 40px; border: 1px solid var(--border); background: var(--bg-subtle); border-radius: 4px; font-size: 13px; padding: 8px; cursor: pointer; }
+    .opt-grid label.on { border-color: var(--fg-interactive); }
+    .related-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px 24px; list-style: none; padding: 0; margin: 0; }
+    @media (min-width: 1024px) { .related-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1280px) { .related-grid { grid-template-columns: repeat(4, 1fr); } }
+    .related-grid .meta { display: flex; justify-content: space-between; margin-top: 16px; font-size: 14px; }
+    .dd-item { display: grid; grid-template-columns: 122px 1fr; gap: 0 16px; }
+  </style>
+</head>
+<body data-shell="main" data-cart-count="0">
+  <!-- AS-IS 근거: app/[countryCode]/(main)/products/[handle]/page.tsx, modules/products/templates/index.tsx, templates/product-info, components/product-tabs (+accordion), image-gallery/variant-image-gallery, product-actions (index, option-select, mobile-actions), product-price, product-onboarding-cta, related-products, modules/layout/components/cart-dropdown -->
+  <!-- 예시 상품: Medusa T-Shirt(handle t-shirt, 옵션 Size S/M/L/XL·Color Black/White, 이미지 4장, weight 400, 컬렉션 없음). 헤더 Cart 수는 담기 전 기준 0 -->
+  <main id="page">
+    <section data-scene="default" data-scene-name="상품 상세" data-base="variant-selected"></section>
+
+    <!-- ===================== default: 옵션 미선택 ===================== -->
+    <section data-scene="no-match" data-scene-name="일치하는 변형 없음">
+      <!-- 주의: AS-IS는 서버에서 첫 번째 재고 있는 변형(S / Black)의 옵션을 미리 선택해 렌더한다. 이 장면은 옵션 조합이 어떤 변형과도 맞지 않아 selectedVariant가 없을 때의 모습("From" 가격, "Select variant" 비활성 버튼, 재고 문구 없음) -->
+      <div class="content-container pd" data-testid="product-container">
+        <div class="col-side col-info">
+          <div data-product-info class="stack gap-4">
+            <h1 style="font-size:30px;line-height:40px;font-weight:500" data-testid="product-title">Medusa T-Shirt</h1>
+            <p class="subtle" style="font-size:16px" data-testid="product-description">Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.</p>
+          </div>
+          <div class="w-full">
+            <div class="acc-item"><div class="acc-head"><span>Product Information</span><span>＋</span></div></div>
+            <div class="acc-item"><div class="acc-head"><span>Shipping &amp; Returns</span><span>＋</span></div></div>
+          </div>
+        </div>
+        <div class="gallery">
+          <div class="img"><img class="seed-photo" src="assets/tee-black-front.webp" alt="tee black front"></div><div class="img"><img class="seed-photo" src="assets/tee-black-back.webp" alt="tee black back"></div><div class="img"><img class="seed-photo" src="assets/tee-white-front.webp" alt="tee white front"></div><div class="img"><img class="seed-photo" src="assets/tee-white-back.webp" alt="tee white back"></div>
+        </div>
+        <div class="col-side col-actions">
+          <form class="stack gap-2" method="post" action="#cart-dropdown">
+            <div class="stack gap-4">
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Size</legend>
+                <div class="opt-grid" data-testid="product-options"><label>S</label><label>M</label><label>L</label><label>XL</label></div></fieldset>
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Color</legend>
+                <div class="opt-grid" data-testid="product-options"><label>Black</label><label>White</label></div></fieldset>
+              <hr class="divider">
+            </div>
+            <div style="font-size:20px;font-weight:600">From <span data-testid="product-price">€10.00</span></div>
+            <button class="btn btn-primary w-full" style="height:40px" type="button" disabled data-testid="add-product-button">Select variant</button>
+          </form>
+        </div>
+      </div>
+      <div class="content-container" style="margin:128px auto" data-testid="related-products-container">
+        <div class="stack" style="align-items:center;text-align:center;margin-bottom:64px">
+          <span class="subtle mb-6">Related products</span>
+          <p style="font-size:24px;max-width:512px">You might also want to check out these products.</p>
+        </div>
+        <!-- 관련 상품: 같은 컬렉션·태그 조건(없으면 지역 전체 상품)에서 자기 자신 제외. 목록은 예시 -->
+        <ul class="related-grid">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatshirt-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatshirt</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatpants-gray-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatpants</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/shorts-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Shorts</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="muted">€42.00</span></div></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== variant-selected: 옵션 선택 ===================== -->
+    <section data-scene="variant-selected" data-scene-name="옵션 선택">
+      <!-- URL에 ?v_id=<변형 ID>가 반영된다(router.replace) -->
+      <div class="content-container pd" data-testid="product-container">
+        <div class="col-side col-info">
+          <div data-product-info class="stack gap-4">
+            <h1 style="font-size:30px;line-height:40px;font-weight:500" data-testid="product-title">Medusa T-Shirt</h1>
+            <p class="subtle" style="font-size:16px" data-testid="product-description">Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.</p>
+          </div>
+          <div class="w-full">
+            <div class="acc-item"><div class="acc-head"><span>Product Information</span><span>－</span></div>
+              <div style="font-size:13px;padding:32px 0;display:grid;grid-template-columns:1fr 1fr;gap:0 32px">
+                <div class="stack gap-4"><div><span class="semi">Material</span><p>-</p></div><div><span class="semi">Country of origin</span><p>-</p></div><div><span class="semi">Type</span><p>-</p></div></div>
+                <div class="stack gap-4"><div><span class="semi">Weight</span><p>400 g</p></div><div><span class="semi">Dimensions</span><p>-</p></div></div>
+              </div>
+            </div>
+            <div class="acc-item"><div class="acc-head"><span>Shipping &amp; Returns</span><span>－</span></div>
+              <div style="font-size:13px;padding:32px 0;display:grid;gap:32px">
+                <div class="row gap-2" style="align-items:flex-start"><span>🚚</span><div><span class="semi">Fast delivery</span><p style="max-width:384px">Your package will arrive in 3-5 business days at your pick up location or in the comfort of your home.</p></div></div>
+                <div class="row gap-2" style="align-items:flex-start"><span>↻</span><div><span class="semi">Simple exchanges</span><p style="max-width:384px">Is the fit not quite right? No worries - we'll exchange your product for a new one.</p></div></div>
+                <div class="row gap-2" style="align-items:flex-start"><span>↩</span><div><span class="semi">Easy returns</span><p style="max-width:384px">Just return your product and we'll refund your money. No questions asked – we'll do our best to make sure your return is hassle-free.</p></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery">
+          <!-- 시드 변형에는 변형별 이미지가 없어 상품 이미지 4장이 그대로 표시된다 -->
+          <div class="img"><img class="seed-photo" src="assets/tee-black-front.webp" alt="tee black front"></div><div class="img"><img class="seed-photo" src="assets/tee-black-back.webp" alt="tee black back"></div><div class="img"><img class="seed-photo" src="assets/tee-white-front.webp" alt="tee white front"></div><div class="img"><img class="seed-photo" src="assets/tee-white-back.webp" alt="tee white back"></div>
+        </div>
+        <div class="col-side col-actions">
+          <form class="stack gap-2" method="post" action="#cart-dropdown">
+            <div class="stack gap-4">
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Size</legend>
+                <div class="opt-grid"><label>S</label><label class="on">M</label><label>L</label><label>XL</label></div></fieldset>
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Color</legend>
+                <div class="opt-grid"><label class="on">Black</label><label>White</label></div></fieldset>
+              <hr class="divider">
+            </div>
+            <div style="font-size:20px;font-weight:600"><span data-testid="product-price">€10.00</span></div>
+            <p class="subtle" style="font-size:13px" data-testid="product-availability">In stock</p>
+            <!-- JS 있음: addToCart 후 notifyCartUpdated → 헤더 장바구니 드롭다운이 5초간 열림. JS 없음: POST /{countryCode}/cart/add -->
+            <a class="btn btn-primary w-full" style="height:40px" href="#cart-dropdown" data-testid="add-product-button">Add to cart</a>
+          </form>
+        </div>
+      </div>
+      <div class="content-container" style="margin:128px auto" data-testid="related-products-container">
+        <div class="stack" style="align-items:center;text-align:center;margin-bottom:64px">
+          <span class="subtle mb-6">Related products</span>
+          <p style="font-size:24px;max-width:512px">You might also want to check out these products.</p>
+        </div>
+        <ul class="related-grid">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatshirt-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatshirt</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatpants-gray-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatpants</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/shorts-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Shorts</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="muted">€42.00</span></div></a></li>
+        </ul>
+      </div>
+
+      <!-- 헤더 Cart (n) 아래 드롭다운(PopoverPanel, small 이상에서만 표시, 420px). 담은 직후 5초 뒤 자동으로 닫힘. 마우스를 올리면 유지 -->
+      <div class="dropdown" data-dropdown style="display:none;border-top:0" data-testid="nav-cart-dropdown">
+        <div style="padding:16px;display:flex;justify-content:center"><h3 style="font-size:18px;font-weight:600">Cart</h3></div>
+        <div style="padding:0 16px;display:grid;gap:32px;max-height:402px;overflow-y:auto">
+          <div class="dd-item" data-testid="cart-item">
+            <a href="product-detail.html" style="width:96px"><div class="thumb square"></div></a>
+            <div class="stack between" style="flex:1">
+              <div class="row between" style="align-items:flex-start">
+                <div class="stack" style="width:180px;margin-right:16px;white-space:nowrap">
+                  <h3 style="font-size:14px;font-weight:400;overflow:hidden;text-overflow:ellipsis"><a href="product-detail.html" data-testid="product-link">M / Black</a></h3>
+                  <span class="subtle" data-testid="cart-item-variant">Variant: M / Black</span>
+                  <span data-testid="cart-item-quantity">Quantity: 1</span>
+                </div>
+                <span data-testid="product-price">€10.00</span>
+              </div>
+              <button class="row gap-1 subtle" style="background:none;border:0;padding:0;margin-top:4px;font-size:13px" type="button" data-testid="cart-item-remove-button">🗑 <span>Remove</span></button>
+            </div>
+          </div>
+        </div>
+        <!-- item.title은 라인 아이템 제목(시드에서는 변형 제목 "M / Black")이다. 미확인: 라인 아이템 title 값이 상품명인지 변형명인지는 Medusa 장바구니 생성 규칙에 따름 -->
+        <div style="padding:16px;display:flex;flex-direction:column;gap:16px;font-size:13px">
+          <div class="row between"><span class="semi">Subtotal <span style="font-weight:400">(excl. taxes)</span></span><span style="font-size:18px;font-weight:600" data-testid="cart-subtotal">€10.00</span></div>
+          <a class="btn btn-primary btn-large w-full" href="cart.html" data-testid="go-to-cart-button">Go to cart</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== out-of-stock: 품절 ===================== -->
+    <section data-scene="out-of-stock" data-scene-name="품절">
+      <!-- 미확인: 시드 재고는 변형마다 1,000,000개라 기본 데이터로는 품절이 나오지 않는다. 재고가 0이고 manage_inventory=true, allow_backorder=false인 변형을 선택했을 때의 모습 -->
+      <div class="content-container pd" data-testid="product-container">
+        <div class="col-side col-info">
+          <div data-product-info class="stack gap-4">
+            <h1 style="font-size:30px;line-height:40px;font-weight:500" data-testid="product-title">Medusa T-Shirt</h1>
+            <p class="subtle" style="font-size:16px" data-testid="product-description">Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.</p>
+          </div>
+          <div class="w-full">
+            <div class="acc-item"><div class="acc-head"><span>Product Information</span><span>＋</span></div></div>
+            <div class="acc-item"><div class="acc-head"><span>Shipping &amp; Returns</span><span>＋</span></div></div>
+          </div>
+        </div>
+        <div class="gallery">
+          <div class="img"><img class="seed-photo" src="assets/tee-black-front.webp" alt="tee black front"></div><div class="img"><img class="seed-photo" src="assets/tee-black-back.webp" alt="tee black back"></div><div class="img"><img class="seed-photo" src="assets/tee-white-front.webp" alt="tee white front"></div><div class="img"><img class="seed-photo" src="assets/tee-white-back.webp" alt="tee white back"></div>
+        </div>
+        <div class="col-side col-actions">
+          <form class="stack gap-2" method="post">
+            <div class="stack gap-4">
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Size</legend>
+                <div class="opt-grid"><label>S</label><label>M</label><label>L</label><label class="on">XL</label></div></fieldset>
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Color</legend>
+                <div class="opt-grid"><label>Black</label><label class="on">White</label></div></fieldset>
+              <hr class="divider">
+            </div>
+            <div style="font-size:20px;font-weight:600"><span data-testid="product-price">€10.00</span></div>
+            <p class="subtle" style="font-size:13px" data-testid="product-availability">Out of stock</p>
+            <button class="btn btn-primary w-full" style="height:40px" type="button" disabled data-testid="add-product-button">Out of stock</button>
+          </form>
+        </div>
+      </div>
+      <div class="content-container" style="margin:128px auto" data-testid="related-products-container">
+        <div class="stack" style="align-items:center;text-align:center;margin-bottom:64px">
+          <span class="subtle mb-6">Related products</span>
+          <p style="font-size:24px;max-width:512px">You might also want to check out these products.</p>
+        </div>
+        <ul class="related-grid">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatshirt-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatshirt</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatpants-gray-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatpants</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/shorts-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Shorts</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="muted">€42.00</span></div></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section data-scene="cart-dropdown" data-scene-name="담기 후 장바구니 드롭다운" data-base="variant-selected" data-overlay="cart-dropdown"></section>
+    <section data-scene="mobile-options" data-scene-name="모바일 구매 바">
+      <!-- URL에 ?v_id=<변형 ID>가 반영된다(router.replace) -->
+      <div class="content-container pd" data-testid="product-container">
+        <div class="col-side col-info">
+          <div data-product-info class="stack gap-4">
+            <h1 style="font-size:30px;line-height:40px;font-weight:500" data-testid="product-title">Medusa T-Shirt</h1>
+            <p class="subtle" style="font-size:16px" data-testid="product-description">Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.</p>
+          </div>
+          <div class="w-full">
+            <div class="acc-item"><div class="acc-head"><span>Product Information</span><span>－</span></div>
+              <div style="font-size:13px;padding:32px 0;display:grid;grid-template-columns:1fr 1fr;gap:0 32px">
+                <div class="stack gap-4"><div><span class="semi">Material</span><p>-</p></div><div><span class="semi">Country of origin</span><p>-</p></div><div><span class="semi">Type</span><p>-</p></div></div>
+                <div class="stack gap-4"><div><span class="semi">Weight</span><p>400 g</p></div><div><span class="semi">Dimensions</span><p>-</p></div></div>
+              </div>
+            </div>
+            <div class="acc-item"><div class="acc-head"><span>Shipping &amp; Returns</span><span>－</span></div>
+              <div style="font-size:13px;padding:32px 0;display:grid;gap:32px">
+                <div class="row gap-2" style="align-items:flex-start"><span>🚚</span><div><span class="semi">Fast delivery</span><p style="max-width:384px">Your package will arrive in 3-5 business days at your pick up location or in the comfort of your home.</p></div></div>
+                <div class="row gap-2" style="align-items:flex-start"><span>↻</span><div><span class="semi">Simple exchanges</span><p style="max-width:384px">Is the fit not quite right? No worries - we'll exchange your product for a new one.</p></div></div>
+                <div class="row gap-2" style="align-items:flex-start"><span>↩</span><div><span class="semi">Easy returns</span><p style="max-width:384px">Just return your product and we'll refund your money. No questions asked – we'll do our best to make sure your return is hassle-free.</p></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery">
+          <!-- 시드 변형에는 변형별 이미지가 없어 상품 이미지 4장이 그대로 표시된다 -->
+          <div class="img"><img class="seed-photo" src="assets/tee-black-front.webp" alt="tee black front"></div><div class="img"><img class="seed-photo" src="assets/tee-black-back.webp" alt="tee black back"></div><div class="img"><img class="seed-photo" src="assets/tee-white-front.webp" alt="tee white front"></div><div class="img"><img class="seed-photo" src="assets/tee-white-back.webp" alt="tee white back"></div>
+        </div>
+        <div class="col-side col-actions">
+          <form class="stack gap-2" method="post" action="#cart-dropdown">
+            <div class="stack gap-4">
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Size</legend>
+                <div class="opt-grid"><label>S</label><label class="on">M</label><label>L</label><label>XL</label></div></fieldset>
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Color</legend>
+                <div class="opt-grid"><label class="on">Black</label><label>White</label></div></fieldset>
+              <hr class="divider">
+            </div>
+            <div style="font-size:20px;font-weight:600"><span data-testid="product-price">€10.00</span></div>
+            <p class="subtle" style="font-size:13px" data-testid="product-availability">In stock</p>
+            <!-- JS 있음: addToCart 후 notifyCartUpdated → 헤더 장바구니 드롭다운이 5초간 열림. JS 없음: POST /{countryCode}/cart/add -->
+            <a class="btn btn-primary w-full" style="height:40px" href="#cart-dropdown" data-testid="add-product-button">Add to cart</a>
+          </form>
+        </div>
+      </div>
+      <div class="content-container" style="margin:128px auto" data-testid="related-products-container">
+        <div class="stack" style="align-items:center;text-align:center;margin-bottom:64px">
+          <span class="subtle mb-6">Related products</span>
+          <p style="font-size:24px;max-width:512px">You might also want to check out these products.</p>
+        </div>
+        <ul class="related-grid">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatshirt-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatshirt</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatpants-gray-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatpants</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/shorts-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Shorts</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="muted">€42.00</span></div></a></li>
+        </ul>
+      </div>
+
+      <!-- 헤더 Cart (n) 아래 드롭다운(PopoverPanel, small 이상에서만 표시, 420px). 담은 직후 5초 뒤 자동으로 닫힘. 마우스를 올리면 유지 -->
+      <div class="dropdown" data-dropdown style="display:none;border-top:0" data-testid="nav-cart-dropdown">
+        <div style="padding:16px;display:flex;justify-content:center"><h3 style="font-size:18px;font-weight:600">Cart</h3></div>
+        <div style="padding:0 16px;display:grid;gap:32px;max-height:402px;overflow-y:auto">
+          <div class="dd-item" data-testid="cart-item">
+            <a href="product-detail.html" style="width:96px"><div class="thumb square"></div></a>
+            <div class="stack between" style="flex:1">
+              <div class="row between" style="align-items:flex-start">
+                <div class="stack" style="width:180px;margin-right:16px;white-space:nowrap">
+                  <h3 style="font-size:14px;font-weight:400;overflow:hidden;text-overflow:ellipsis"><a href="product-detail.html" data-testid="product-link">M / Black</a></h3>
+                  <span class="subtle" data-testid="cart-item-variant">Variant: M / Black</span>
+                  <span data-testid="cart-item-quantity">Quantity: 1</span>
+                </div>
+                <span data-testid="product-price">€10.00</span>
+              </div>
+              <button class="row gap-1 subtle" style="background:none;border:0;padding:0;margin-top:4px;font-size:13px" type="button" data-testid="cart-item-remove-button">🗑 <span>Remove</span></button>
+            </div>
+          </div>
+        </div>
+        <!-- item.title은 라인 아이템 제목(시드에서는 변형 제목 "M / Black")이다. 미확인: 라인 아이템 title 값이 상품명인지 변형명인지는 Medusa 장바구니 생성 규칙에 따름 -->
+        <div style="padding:16px;display:flex;flex-direction:column;gap:16px;font-size:13px">
+          <div class="row between"><span class="semi">Subtotal <span style="font-weight:400">(excl. taxes)</span></span><span style="font-size:18px;font-weight:600" data-testid="cart-subtotal">€10.00</span></div>
+          <a class="btn btn-primary btn-large w-full" href="cart.html" data-testid="go-to-cart-button">Go to cart</a>
+        </div>
+      </div>
+    <div class="mobile-buy"><span>Medusa T-Shirt — €10.00</span><div><select aria-label="Select options"><option>S / Black</option><option>M / White</option></select> <a class="btn btn-primary" href="#cart-dropdown">Add to cart</a></div></div></section>
+    <section data-scene="onboarding" data-scene-name="상품 생성 안내"><aside class="content-container py-12"><h2>Your demo product was successfully created!</h2><p>You can now continue setting up your store in the admin.</p><a class="btn btn-secondary" href="http://localhost:7001/a/orders?onboarding_step=create_order_nextjs">Continue setup in admin</a></aside>
+      <!-- URL에 ?v_id=<변형 ID>가 반영된다(router.replace) -->
+      <div class="content-container pd" data-testid="product-container">
+        <div class="col-side col-info">
+          <div data-product-info class="stack gap-4">
+            <h1 style="font-size:30px;line-height:40px;font-weight:500" data-testid="product-title">Medusa T-Shirt</h1>
+            <p class="subtle" style="font-size:16px" data-testid="product-description">Reimagine the feeling of a classic T-shirt. With our cotton T-shirts, everyday essentials no longer have to be ordinary.</p>
+          </div>
+          <div class="w-full">
+            <div class="acc-item"><div class="acc-head"><span>Product Information</span><span>－</span></div>
+              <div style="font-size:13px;padding:32px 0;display:grid;grid-template-columns:1fr 1fr;gap:0 32px">
+                <div class="stack gap-4"><div><span class="semi">Material</span><p>-</p></div><div><span class="semi">Country of origin</span><p>-</p></div><div><span class="semi">Type</span><p>-</p></div></div>
+                <div class="stack gap-4"><div><span class="semi">Weight</span><p>400 g</p></div><div><span class="semi">Dimensions</span><p>-</p></div></div>
+              </div>
+            </div>
+            <div class="acc-item"><div class="acc-head"><span>Shipping &amp; Returns</span><span>－</span></div>
+              <div style="font-size:13px;padding:32px 0;display:grid;gap:32px">
+                <div class="row gap-2" style="align-items:flex-start"><span>🚚</span><div><span class="semi">Fast delivery</span><p style="max-width:384px">Your package will arrive in 3-5 business days at your pick up location or in the comfort of your home.</p></div></div>
+                <div class="row gap-2" style="align-items:flex-start"><span>↻</span><div><span class="semi">Simple exchanges</span><p style="max-width:384px">Is the fit not quite right? No worries - we'll exchange your product for a new one.</p></div></div>
+                <div class="row gap-2" style="align-items:flex-start"><span>↩</span><div><span class="semi">Easy returns</span><p style="max-width:384px">Just return your product and we'll refund your money. No questions asked – we'll do our best to make sure your return is hassle-free.</p></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery">
+          <!-- 시드 변형에는 변형별 이미지가 없어 상품 이미지 4장이 그대로 표시된다 -->
+          <div class="img"><img class="seed-photo" src="assets/tee-black-front.webp" alt="tee black front"></div><div class="img"><img class="seed-photo" src="assets/tee-black-back.webp" alt="tee black back"></div><div class="img"><img class="seed-photo" src="assets/tee-white-front.webp" alt="tee white front"></div><div class="img"><img class="seed-photo" src="assets/tee-white-back.webp" alt="tee white back"></div>
+        </div>
+        <div class="col-side col-actions">
+          <form class="stack gap-2" method="post" action="#cart-dropdown">
+            <div class="stack gap-4">
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Size</legend>
+                <div class="opt-grid"><label>S</label><label class="on">M</label><label>L</label><label>XL</label></div></fieldset>
+              <fieldset class="stack gap-3" style="border:0;margin:0;padding:0"><legend style="font-size:14px;margin-bottom:12px">Select Color</legend>
+                <div class="opt-grid"><label class="on">Black</label><label>White</label></div></fieldset>
+              <hr class="divider">
+            </div>
+            <div style="font-size:20px;font-weight:600"><span data-testid="product-price">€10.00</span></div>
+            <p class="subtle" style="font-size:13px" data-testid="product-availability">In stock</p>
+            <!-- JS 있음: addToCart 후 notifyCartUpdated → 헤더 장바구니 드롭다운이 5초간 열림. JS 없음: POST /{countryCode}/cart/add -->
+            <a class="btn btn-primary w-full" style="height:40px" href="#cart-dropdown" data-testid="add-product-button">Add to cart</a>
+          </form>
+        </div>
+      </div>
+      <div class="content-container" style="margin:128px auto" data-testid="related-products-container">
+        <div class="stack" style="align-items:center;text-align:center;margin-bottom:64px">
+          <span class="subtle mb-6">Related products</span>
+          <p style="font-size:24px;max-width:512px">You might also want to check out these products.</p>
+        </div>
+        <ul class="related-grid">
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatshirt-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatshirt</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/sweatpants-gray-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Sweatpants</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"><img class="seed-photo" src="assets/shorts-vintage-front.webp" alt=""></div><div class="meta"><span class="subtle">Medusa Shorts</span><span class="muted">€10.00</span></div></a></li>
+          <li><a href="product-detail.html"><div class="thumb"></div><div class="meta"><span class="subtle">Vintage Cotton Tee</span><span class="muted">€42.00</span></div></a></li>
+        </ul>
+      </div>
+
+      <!-- 헤더 Cart (n) 아래 드롭다운(PopoverPanel, small 이상에서만 표시, 420px). 담은 직후 5초 뒤 자동으로 닫힘. 마우스를 올리면 유지 -->
+      <div class="dropdown" data-dropdown style="display:none;border-top:0" data-testid="nav-cart-dropdown">
+        <div style="padding:16px;display:flex;justify-content:center"><h3 style="font-size:18px;font-weight:600">Cart</h3></div>
+        <div style="padding:0 16px;display:grid;gap:32px;max-height:402px;overflow-y:auto">
+          <div class="dd-item" data-testid="cart-item">
+            <a href="product-detail.html" style="width:96px"><div class="thumb square"></div></a>
+            <div class="stack between" style="flex:1">
+              <div class="row between" style="align-items:flex-start">
+                <div class="stack" style="width:180px;margin-right:16px;white-space:nowrap">
+                  <h3 style="font-size:14px;font-weight:400;overflow:hidden;text-overflow:ellipsis"><a href="product-detail.html" data-testid="product-link">M / Black</a></h3>
+                  <span class="subtle" data-testid="cart-item-variant">Variant: M / Black</span>
+                  <span data-testid="cart-item-quantity">Quantity: 1</span>
+                </div>
+                <span data-testid="product-price">€10.00</span>
+              </div>
+              <button class="row gap-1 subtle" style="background:none;border:0;padding:0;margin-top:4px;font-size:13px" type="button" data-testid="cart-item-remove-button">🗑 <span>Remove</span></button>
+            </div>
+          </div>
+        </div>
+        <!-- item.title은 라인 아이템 제목(시드에서는 변형 제목 "M / Black")이다. 미확인: 라인 아이템 title 값이 상품명인지 변형명인지는 Medusa 장바구니 생성 규칙에 따름 -->
+        <div style="padding:16px;display:flex;flex-direction:column;gap:16px;font-size:13px">
+          <div class="row between"><span class="semi">Subtotal <span style="font-weight:400">(excl. taxes)</span></span><span style="font-size:18px;font-weight:600" data-testid="cart-subtotal">€10.00</span></div>
+          <a class="btn btn-primary btn-large w-full" href="cart.html" data-testid="go-to-cart-button">Go to cart</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="assets/shell.js"></script>
+</body>
+</html>
